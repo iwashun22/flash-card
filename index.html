@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>flip cards</title>
+   <link rel="stylesheet" href="./general.css">
+   <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+   <div class="background"></div>
+   <div class="container flex-column">
+      <div class="search-bar flex">
+         <input type="text" id="search-btn" placeholder="search items">
+         <button id="trigger-search">
+            <img width="20px" height="20px" src="./images/magnifying-glass-solid.svg" alt="icon">
+         </button>
+      </div>
+      <div id="cards">
+         <div></div>
+         <div></div>
+         <div></div>
+      </div>
+   </div>
+   <button class="floating-btn" id="add-card">
+      <img width="25px" height="25px" src="./images/square-plus-solid.svg" alt="icon">
+   </button>
+   <button class="floating-btn" id="start-quiz">
+      <img width="25px" height="25px" src="./images/clipboard-question-solid.svg" alt="icon">
+   </button>
+   <script src="script.js"></script>
+</body>
+</html>
