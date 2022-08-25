@@ -7,20 +7,19 @@
    <title>flip cards</title>
    <link rel="stylesheet" href="./general.css">
    <link rel="stylesheet" href="./style.css">
+   <link rel="stylesheet" href="./pop-up.css">
 </head>
 <body>
    <div class="background"></div>
    <div class="container flex-column">
       <div class="search-bar flex">
-         <input type="text" id="search-btn" placeholder="search items">
+         <input type="text" id="search-btn" placeholder="search">
          <button id="trigger-search">
             <img width="20px" height="20px" src="./images/magnifying-glass-solid.svg" alt="icon">
          </button>
       </div>
-      <div id="cards">
-         <div></div>
-         <div></div>
-         <div></div>
+      <div id="cards-container" class="flex">
+
       </div>
    </div>
    <button class="floating-btn" id="add-card">
@@ -29,6 +28,31 @@
    <button class="floating-btn" id="start-quiz">
       <img width="25px" height="25px" src="./images/clipboard-question-solid.svg" alt="icon">
    </button>
+   <template id="cards-box-tmp">
+      <div class="cards-box">
+         <div class="cards">
+            <div class="wrapper flex-column">
+               <span class="title">{title}</span>
+               <span class="description">{description}</span>
+            </div>
+            <button class="edit hide">
+               <img src="./images/pen-to-square-solid.svg" width="20px" height="20px" alt="icon">
+            </button>
+            <button class="delete hide">
+               <img src="./images/trash-can-solid.svg" width="20px" height="20px" alt="icon">
+            </button>
+         </div>
+      </div>
+   </template>
+   <template id="pop-up-tmp">
+      <div class="block-filter">
+         <div class="pop-up">
+            <div class="content flex-column">{message}</div>
+            <button class="decline">{declineText}</button>
+            <button class="confirm">{confirmText}</button>
+         </div>
+      </div>
+   </template>
    <script src="script.js"></script>
 </body>
 </html>

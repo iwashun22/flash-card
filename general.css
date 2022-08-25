@@ -12,11 +12,16 @@
 body {
    width: 100vw;
    height: 100vh;
+   overflow: hidden;
 }
 
-.hide { display: none; }
+.hide { display: none !important; }
 .flex, .flex-column { display: flex; }
 .flex-column {
    flex-direction: column;
 }
 .grid { display: grid; }
+
+button {
+   background-color: gray;
+}
