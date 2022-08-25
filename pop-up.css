@@ -1,0 +1,56 @@
+:root {
+   --pop-up-decline-color: rgb(255, 111, 111);
+   --pop-up-confirm-color: rgb(114, 255, 114);
+}
+
+.block-filter {
+   width: 100vw;
+   height: 100vh;
+   background-color: rgba(0, 0, 0, 0.5);
+   position: absolute;
+   top: 0;
+   left: 0;
+}
+
+.pop-up {
+   position: absolute;
+   top: 10px;
+   left: 50%;
+   transform: translate(-50%, 0);
+   min-width: 300px;
+   min-height: 50px;
+   background-color: white;
+   border-radius: 20px;
+   overflow: hidden;
+}
+.pop-up .content {
+   margin: 20px;
+   text-align: center;
+   justify-content: center;
+   align-items: center;
+}
+.pop-up button {
+   min-width: 50px;
+   min-height: 30px;
+   margin: 15px;
+   cursor: pointer;
+   background-color: transparent;
+   border: 2px solid;
+   border-radius: 5px;
+   font-weight: 400;
+   transition: .3s;
+}
+.pop-up .decline {
+   border-color: var(--pop-up-decline-color);
+   float: left;
+}
+.pop-up .decline:hover {
+   background-color: var(--pop-up-decline-color);
+}
+.pop-up .confirm {
+   border-color: var(--pop-up-confirm-color);
+   float: right;
+}
+.pop-up .confirm:hover {
+   background-color: var(--pop-up-confirm-color);
+}
