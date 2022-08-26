@@ -1,13 +1,16 @@
 'use strict';
 
-const cardsMap = new Map();
-cardsMap.set('hello', 'hello world program');
-cardsMap.set('apple', 'is a red fruit');
-cardsMap.set('javascript', 'is my favorite programming language');
+// sample cards
+const cardsMap = new Map([
+   ['hello', 'hello world program'],
+   ['apple', 'is a red fruit'],
+   ['javascript', 'is my favorite programming language']
+]);
 
 
 window.addEventListener('load', () => {
-   
+
+
 //::: BACKGROUND MOUSEMOVE EFFECT ::://
 const bg = document.querySelector('.background');
 let timeOut = true;
@@ -32,8 +35,9 @@ document.addEventListener('mousemove', e => {
 //::: ADDING INITIAL CARDS TO DOCUMENT ::://
 const keys = Array.from(cardsMap.keys());
 keys.forEach(key => {
-   createCard(key);
+   createCard(false, key);
 })
+
 
 //::: REMOVE CHECKED CARDS WHEN CLICK SOMEWHERE OFF ::://
 document.addEventListener('click', e => {
@@ -58,20 +62,78 @@ document.addEventListener('click', e => {
    }
 })
 
+
+//::: ADD CARDS ::://
+const addButton = document.getElementById('add-card');
+addButton.addEventListener('click', e => {
+   // const div = document.createElement('div');
+   // div.className = 'flex-column';
+   // // Title
+   // const inputTitle = document.createElement('input');
+   // inputTitle.setAttribute('placeholder', 'name');
+   // inputTitle.setAttribute('type', 'text');
+   // // Discription
+   // const inputDescription = document.createElement('textarea');
+   // inputDescription.setAttribute('placeholder', 'discription/definition/etc')
+   // div.appendChild(inputTitle);
+   // div.appendChild(inputDescription);
+   const cloneInputForm = inputFormTemplate.content.cloneNode(true);
+   const div = cloneInputForm.querySelector('.input-layout');
+   const id = (Math.random()*10000).toString(16).replace('.', '');
+   const label = cloneInputForm.querySelector('label');
+   const inputText = cloneInputForm.querySelector('input[type=text]');
+   inputText.id = id;
+   label.setAttribute('for', id);
+   createPopUp(
+      { element: div },
+      '破棄',
+      '追加',
+      () => {
+         if(inputTitle.value && inputDescription.value) {
+            createCard(true, inputTitle.value, inputDescription.value)
+         }
+      }
+   )
+})
 });
 
 const body = document.getElementsByTagName('body')[0];
 const cardsContainer = document.getElementById('cards-container');
 const cardTemplate = document.getElementById('cards-box-tmp');
 const popUpTemplate = document.getElementById('pop-up-tmp');
+const inputFormTemplate = document.getElementById('input-tmp');
 
 /**
  * 
+ * @param {Boolean} isNew
  * @param {String} key Map key
+ * @param {String} value
  */
-function createCard(key) {
+function createCard(isNew, key, value) {
    if(!key) return -1;
-   const text = cardsMap.get(key); 
+   let text;
+   if(isNew) {
+      if(!value) throw new Error('no value is passed');
+      const isAlreadyExist = cardsMap.get(key);
+      if(isAlreadyExist) {
+         let canceled = true;
+         createPopUp(
+            { message: `既にカード名「${key}」は使用されています。上書きしますか？` },
+            'いいえ',
+            'はい',
+            () => {
+               cardsMap.set(key, value);
+               canceled = false;
+            }
+         )
+         if(canceled) return;
+      } else {
+         cardsMap.set(key, value);
+         text = value;
+      }
+   } else {
+      text = cardsMap.get(key); 
+   }
    const cloneCard = cardTemplate.content.cloneNode(true);
    const node = cloneCard.querySelector('.cards-box');
    const card = cloneCard.querySelector('.cards');
@@ -129,6 +191,8 @@ function deleteButton(button, parentNode, node, cardName) {
 
 /**
  * @param {Object} object passing message or element property
+ * @param {String} object.message
+ * @param {HTMLElement} object.element
  * @param {String} declineText
  * @param {String} confirmText 
  * @param {Function} callback function to execute after confirmation
@@ -138,10 +202,12 @@ function createPopUp(object, declineText, confirmText, callback) {
    const node = clonePopUp.querySelector('.block-filter');
 
    // SET message or element
+   const content = clonePopUp.querySelector('.content');
    if(object.message){  
-      clonePopUp.querySelector('.content').innerText = object.message;
+      content.innerText = object.message;
    } else if(object.element) {
-      clonePopUp.querySelector('.content').appendChild(object.element)
+      content.innerHTML = '';
+      content.appendChild(object.element)
    } else {
       return new Error('Provide message or element');
    }

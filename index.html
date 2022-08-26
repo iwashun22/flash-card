@@ -4,7 +4,7 @@
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>flip cards</title>
+   <title>flash cards</title>
    <link rel="stylesheet" href="./general.css">
    <link rel="stylesheet" href="./style.css">
    <link rel="stylesheet" href="./pop-up.css">
@@ -32,8 +32,12 @@
       <div class="cards-box">
          <div class="cards">
             <div class="wrapper flex-column">
-               <span class="title">{title}</span>
-               <span class="description">{description}</span>
+               <span>
+                  <h3 class="title">{title}</h3>
+               </span>
+               <span>
+                  <p class="description">{description}</p>
+               </span>
             </div>
             <button class="edit hide">
                <img src="./images/pen-to-square-solid.svg" width="20px" height="20px" alt="icon">
@@ -51,6 +55,15 @@
             <button class="decline">{declineText}</button>
             <button class="confirm">{confirmText}</button>
          </div>
+      </div>
+   </template>
+   <template id="input-tmp">
+      <div class="input-layout flex-column">
+         <div>
+            <label>カード名</label>
+            <input type="text">
+         </div>
+         <textarea></textarea>
       </div>
    </template>
    <script src="script.js"></script>

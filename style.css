@@ -6,8 +6,8 @@
    --cards-box-height: 200px;
    --cards-width: 280px;
    --cards-height: 180px;
-   --cards-background-color: rgb(255, 228, 178);
-   --cards-hover-background-color: rgb(253, 189, 68);
+   --cards-background-color: rgb(253, 189, 68);
+   --cards-hover-background-color: rgb(255, 228, 178);
    --cards-button-size: 35px;
    --cards-delete-button-color: red;
    --cards-delete-button-hover-color: rgb(170, 0, 0);
@@ -218,4 +218,17 @@ button img {
 }
 .wrapper span {
    flex: 0 0 100%;
+   position: relative;
+}
+.wrapper span .title, .wrapper span .description {
+   position: absolute;
+   display: block;
+   width: 100%;
+   padding: 0 10px;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+}
+.wrapper span .title {
+   text-align: center;
 }
