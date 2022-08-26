@@ -8,6 +8,7 @@
    <link rel="stylesheet" href="./general.css">
    <link rel="stylesheet" href="./style.css">
    <link rel="stylesheet" href="./pop-up.css">
+   <link rel="stylesheet" href="./quiz.css">
 </head>
 <body>
    <div class="background"></div>
@@ -31,13 +32,11 @@
    <template id="cards-box-tmp">
       <div class="cards-box flex">
          <div class="cards">
-            <!-- <div class="wrapper flex-column"> -->
                <span class="front">
                   <h3 class="title">{title}</h3>
                </span>
                <span class="back hide">
                   <p class="description">{description}</p>
-                  <!-- </div> -->
                   <button class="edit">
                      <img src="./images/pen-to-square-solid.svg" width="20px" height="20px" alt="icon">
                   </button>
@@ -61,9 +60,14 @@
       <div class="input-layout flex-column">
          <div>
             <label>カード名</label>
-            <input type="text">
+            <input type="text" maxlength="26">
          </div>
-         <textarea></textarea>
+         <textarea maxlength="250"></textarea>
+      </div>
+   </template>
+   <template id="quiz-tmp">
+      <div class="quiz">
+
       </div>
    </template>
    <script src="script.js"></script>

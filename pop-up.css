@@ -31,8 +31,9 @@
 }
 .pop-up label {
    cursor: pointer;
+   padding: 10px;
 }
-.pop-up input[type=text], .pop-up textarea {
+.pop-up input, .pop-up textarea {
    border: 2px black solid;
    margin: 10px 0;
    border-radius: 20px;
@@ -42,6 +43,11 @@
    line-height: 30px;
    text-align: center;
    text-transform: lowercase;
+}
+.pop-up input[type=number] {
+   line-height: 30px;
+   text-align: center;
+   min-width: 100px;
 }
 .pop-up textarea {
    padding: 10px;

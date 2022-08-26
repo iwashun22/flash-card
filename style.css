@@ -6,8 +6,12 @@
    --cards-box-height: 200px;
    --cards-width: 280px;
    --cards-height: 180px;
+   --cards-title-font-size: 20px;
+   --cards-description-font-size: 14px;
+   --cards-highlight-color: rgba(31, 255, 83, 0.5);
    --cards-background-color: rgb(253, 189, 68);
-   --cards-hover-background-color: rgb(255, 228, 178);
+   --cards-hover-background-color: rgb(200, 148, 51);
+   --cards-checked-background-color: rgb(255, 228, 178);
    --cards-button-size: 35px;
    --cards-delete-button-color: red;
    --cards-delete-button-hover-color: rgb(170, 0, 0);
@@ -59,6 +63,7 @@
 /* floating button */
 .floating-btn {
    position: absolute;
+   cursor: pointer;
    width: var(--floating-button-size);
    height: var(--floating-button-size);
    left: 0;
@@ -175,7 +180,7 @@ button img {
    background-color: var(--cards-hover-background-color);
 }
 .cards.checked {
-   background-color: var(--cards-hover-background-color) !important;
+   background-color: var(--cards-checked-background-color) !important;
 }
 .cards button {
    position: absolute;
@@ -220,7 +225,14 @@ button img {
 }
 .cards span .title {
    text-align: center;
+   font-size: var(--cards-title-font-size);
+}
+.title .highlight {
+   display: inline;
+   font-style: normal;
+   background-color: var(--cards-highlight-color);
 }
 .cards span .description {
    padding: 0 15px;
+   font-size: var(--cards-description-font-size);
 }

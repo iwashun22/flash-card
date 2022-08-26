@@ -2,7 +2,7 @@
 
 // sample cards
 const cardsMap = new Map([
-   ['accept', '…を受け入れる'],
+   ['accept', '…を受け入れる'], 
    ['achieve', '…を達成する'],
    ['acquire', '…を身につける'],
    ['affect', '…に影響を与える'],
@@ -14,7 +14,19 @@ const cardsMap = new Map([
    ['consider', '…について考える'],
    ['consume', '…を消費する'],
    ['decline', '…を断る'],
-   ['depend', '依存する\n次第である']
+   ['depend', '依存する\n次第である'],
+   ['encourage', '…を励ます\n…を助長する'],
+   ['expect', '…を予想する\n…を期待する'],
+   ['fear', '…を恐れる\n恐れ'],
+   ['feed', '…に食べ物を与える\n…を養う'],
+   ['gather', '…を集める\n集まる'],
+   ['guess', '…を推測する'],
+   ['hurt', '…を傷つける'],
+   ['introduce', '…を紹介する'],
+   ['invent', '…を発明する'],
+   ['lead', '…の先頭に立つ'],
+   ['maintain', '…を維持する'],
+
 ]);
 
 
@@ -85,7 +97,7 @@ searchButton.addEventListener('click', e => {
 //::: ADD CARDS ::://
 const addButton = document.getElementById('add-card');
 addButton.addEventListener('click', e => {
-   const cloneInputForm = inputFormTemplate.content.cloneNode(true);
+   const cloneInputForm = template.INPUT_FORM.cloneNode(true);
    const div = cloneInputForm.querySelector('.input-layout');
    const id = (Math.random()*10000).toString(16).replace('.', '');
    const label = cloneInputForm.querySelector('label');
@@ -93,10 +105,11 @@ addButton.addEventListener('click', e => {
    const textareaDescription = cloneInputForm.querySelector('textarea');
    inputTitle.id = id;
    label.setAttribute('for', id);
-   createPopUp(
-      { element: div },
-      '破棄',
-      '作成',
+   createPopUp({ 
+      element: div,
+      declineText: '破棄',
+      confirmText: '作成'
+   },
       () => {
          if(inputTitle.value && textareaDescription.value) {
             createCard(true, inputTitle.value, textareaDescription.value)
@@ -105,13 +118,53 @@ addButton.addEventListener('click', e => {
       }
    )
 })
+
+
+//::: ADD QUIZ ::://
+const quizButton = document.getElementById('start-quiz');
+quizButton.addEventListener('click', e => {
+   const div = document.createElement('div');
+   const id = (Math.random()*10000).toString(16).replace('.', '');
+   const label = document.createElement('label');
+   label.innerText = '問題数';
+   label.setAttribute('for', id);
+   const input = document.createElement('input');
+   input.type = 'number';
+   input.id = id;
+   div.appendChild(label);
+   div.appendChild(input);
+   createPopUp({ 
+      element: div,
+      declineText: 'キャンセル',
+      confirmText: 'スタート'
+   },
+      () => {
+         if(input.value > cardsMap.size) {
+            createPopUp({ 
+               message: 'カード数よりも問題数の方が多いですが、始めますか？',
+               declineText: 'キャンセル',
+               confirmText: 'スタート'
+            },
+               () => {
+                  startQuiz(input.value)
+               }
+            )
+         }
+         startQuiz(input.value);
+      }
+   )
+})
 });
 
 const body = document.getElementsByTagName('body')[0];
 const cardsContainer = document.getElementById('cards-container');
-const cardTemplate = document.getElementById('cards-box-tmp');
-const popUpTemplate = document.getElementById('pop-up-tmp');
-const inputFormTemplate = document.getElementById('input-tmp');
+const template = {
+   CARD: document.getElementById('cards-box-tmp').content,
+   POP_UP: document.getElementById('pop-up-tmp').content,
+   INPUT_FORM: document.getElementById('input-tmp').content,
+   QUIZ: document.getElementById('quiz-tmp').content
+}
+Object.freeze(template);
 
 const searchButton = document.getElementById('trigger-search');
 const searchInput = document.getElementById('search-card-input');
@@ -131,11 +184,20 @@ function searchAndDisplay() {
             sortMap.set(index, array);
          })
          keys = [];
-         for(const [key, value] of sortMap.entries()) {
-            const array = value;
+         const order = Array.from(sortMap.keys());
+         order.sort((a, b) => a - b);
+
+         order.forEach(o => {
+            const array = sortMap.get(o);
             array.sort();
             keys.push(...array);
-         }
+         })
+
+         cardsContainer.innerHTML = '';
+         keys.forEach(key => {
+            createCard(false, key, null, searchText);
+         })
+         return;
       }
    } else {
       keys.sort();
@@ -151,18 +213,32 @@ function searchAndDisplay() {
  * @param {Boolean} isNew
  * @param {String} key Map key
  * @param {String} value
+ * @param {String} highlight
  */
-function createCard(isNew, key, value) {
+function createCard(isNew, key, value, highlight) {
    if(!key) return -1;
    let text;
+   let title;
    if(isNew) {
       if(!key || !value) throw new Error('no name or value is passed');
+      // prevent XSS or create HTML element
+      const hasCharacter = key.search(/#|<|>|%|\*/g) !== -1;
+      if(hasCharacter) {
+         createPopUp({ 
+            message: '「# < > % *」のキャラクターを使わないでください。',
+            confirmText: '戻る'
+         },
+            ()=>{}
+         )
+         return;
+      }
       const isAlreadyExist = cardsMap.get(key);
       if(isAlreadyExist) {
-         createPopUp(
-            { message: `既にカード名「${key}」は使用されています。上書きしますか？` },
-            'いいえ',
-            'はい',
+         createPopUp({ 
+            message: `既にカード名「${key}」は使用されています。上書きしますか？`,
+            declineText: 'いいえ',
+            confirmText: 'はい'
+         },
             () => {
                cardsMap.set(key, value);
                const card = document.getElementById(key);
@@ -178,14 +254,19 @@ function createCard(isNew, key, value) {
    } else {
       text = cardsMap.get(key); 
    }
-   const cloneCard = cardTemplate.content.cloneNode(true);
+   
+   if(highlight) {
+      const regexp = new RegExp(highlight, 'g');
+      title = key.replaceAll(regexp, `<i class="highlight">${highlight}</i>`);
+   }
+   const cloneCard = template.CARD.cloneNode(true);
    const node = cloneCard.querySelector('.cards-box');
    const card = cloneCard.querySelector('.cards');
    card.id = key;
 
    // SET TEXT
    const cardTitle = cloneCard.querySelector('.title');
-   cardTitle.innerText = key;
+   cardTitle.innerHTML = title || key;
 
    // SET DESCRIPTION
    const cardDescription = cloneCard.querySelector('.description');
@@ -220,19 +301,21 @@ function createCard(isNew, key, value) {
          textarea.value = cardsMap.get(key);
          div.appendChild(h3);
          div.appendChild(textarea);
-         createPopUp(
-            { element: div },
-            '破棄',
-            '保存',
+         createPopUp({ 
+            element: div,
+            declineText: '破棄',
+            confirmText: '保存',
+         },
             () => {
                if(textarea.value) {
                   cardDescription.innerText = textarea.value;
                   cardsMap.set(key, textarea.value);
                } else {
-                  createPopUp(
-                     { message: 'テキストを入力していません。' },
-                     '戻る',
-                     '修正',
+                  createPopUp({ 
+                     message: 'テキストを入力していません。',
+                     declineText: '戻る',
+                     confirmText: '修正'
+                  },
                      () => {
                         handle_empty();
                      }
@@ -248,10 +331,11 @@ function createCard(isNew, key, value) {
    const cardDelete = cloneCard.querySelector('.delete');
    cardDelete.addEventListener('click', e => {
       // console.log(node)
-      createPopUp(
-         { message: `本当にカード:'${key}'を削除しますか？` },
-         'いいえ',
-         'はい',
+      createPopUp({ 
+         message: `本当にカード:'${key}'を削除しますか？`,
+         declineText: 'いいえ',
+         confirmText: 'はい'
+      },
          () => {
             cardsContainer.removeChild(node);
             cardsMap.delete(key);
@@ -318,39 +402,58 @@ function flipCard(card, frontToBack) {
  * @param {Object} object passing message or element property
  * @param {String} object.message
  * @param {HTMLElement} object.element
- * @param {String} declineText
- * @param {String} confirmText 
+ * @param {String} object.declineText
+ * @param {String} object.confirmText 
  * @param {Function} callback function to execute after confirmation
  */
-function createPopUp(object, declineText, confirmText, callback) {
-   const clonePopUp = popUpTemplate.content.cloneNode(true);
+function createPopUp(object, callback) {
+   const clonePopUp = template.POP_UP.cloneNode(true);
    const node = clonePopUp.querySelector('.block-filter');
+   const content = clonePopUp.querySelector('.content');
+
+   if(object.message && object.element != null) {
+      console.error(object.element != null);
+      console.error(typeof object.element);
+      throw new Error('Do not provide both message and element');
+   }
 
    // SET message or element
-   const content = clonePopUp.querySelector('.content');
    if(object.message){  
       content.innerText = object.message;
    } else if(object.element) {
       content.innerHTML = '';
       content.appendChild(object.element)
    } else {
-      return new Error('Provide message or element');
+      throw new Error('Provide message or element');
    }
 
+   if(!object.confirmText) throw new Error('Needs to provide at least confirmText');
+
    // SET declineText
-   clonePopUp.querySelector('.decline').innerText = declineText || 'cancel';
+   if(object.declineText) {
+      clonePopUp.querySelector('.decline').innerText = object.declineText;
+   }
 
    // SET confirmText
-   clonePopUp.querySelector('.confirm').innerText = confirmText || 'ok';
+   clonePopUp.querySelector('.confirm').innerText = object.confirmText;
 
    // HIDE POP UP
    clonePopUp.querySelectorAll('button').forEach(button => {
       button.addEventListener('click', () => {
          body.removeChild(node);
          // check if it was a confirm button
-         if(button.innerText === confirmText) 
+         if(button.innerText === object.confirmText) 
             callback();
       })
    })
    body.appendChild(clonePopUp);
+}
+
+function startQuiz(numOfQuestions) {
+   const quizTemplate = template.QUIZ.cloneNode(true);
+   const node = quizTemplate.querySelector('.quiz');
+   body.appendChild(node);
+   for(let i=0; i<numOfQuestions; i++) {
+
+   }
 }
