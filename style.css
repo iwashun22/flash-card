@@ -221,3 +221,6 @@ button img {
 .cards span .title {
    text-align: center;
 }
+.cards span .description {
+   padding: 0 15px;
+}

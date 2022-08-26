@@ -2,9 +2,19 @@
 
 // sample cards
 const cardsMap = new Map([
-   ['hello', 'hello world program'],
-   ['apple', 'is a red fruit'],
-   ['javascript', 'is my favorite programming language']
+   ['accept', '…を受け入れる'],
+   ['achieve', '…を達成する'],
+   ['acquire', '…を身につける'],
+   ['affect', '…に影響を与える'],
+   ['agree', '同意する'],
+   ['allow', '…を許可する'],
+   ['belong', '属する'],
+   ['care', '気にかける (I care)\n注意 (take care)\n関心 (care about)'],
+   ['compare', '…を比較する'],
+   ['consider', '…について考える'],
+   ['consume', '…を消費する'],
+   ['decline', '…を断る'],
+   ['depend', '依存する\n次第である']
 ]);
 
 
@@ -33,10 +43,7 @@ document.addEventListener('mousemove', e => {
 
 
 //::: ADDING INITIAL CARDS TO DOCUMENT ::://
-const keys = Array.from(cardsMap.keys());
-keys.forEach(key => {
-   createCard(false, key);
-})
+searchAndDisplay();
 
 
 //::: REMOVE CHECKED CARDS WHEN CLICK SOMEWHERE OFF ::://
@@ -46,6 +53,7 @@ document.addEventListener('click', e => {
    let containsCard = false;
    Array.from(elements).forEach(element => {
       if(containsCard) return;
+      // need to check if there is a classname because it includes the whole document
       if(element.className) {
          if(element.classList.contains('cards')) {
             containsCard = true;
@@ -63,6 +71,17 @@ document.addEventListener('click', e => {
 })
 
 
+//::: SEARCH CARDS ::://
+searchInput.addEventListener('keypress', e => {
+   if(e.key === 'Enter') {
+      searchAndDisplay();
+   }
+})
+searchButton.addEventListener('click', e => {
+   searchAndDisplay();
+})
+
+
 //::: ADD CARDS ::://
 const addButton = document.getElementById('add-card');
 addButton.addEventListener('click', e => {
@@ -77,10 +96,11 @@ addButton.addEventListener('click', e => {
    createPopUp(
       { element: div },
       '破棄',
-      '追加',
+      '作成',
       () => {
          if(inputTitle.value && textareaDescription.value) {
             createCard(true, inputTitle.value, textareaDescription.value)
+            searchAndDisplay();
          }
       }
    )
@@ -93,6 +113,39 @@ const cardTemplate = document.getElementById('cards-box-tmp');
 const popUpTemplate = document.getElementById('pop-up-tmp');
 const inputFormTemplate = document.getElementById('input-tmp');
 
+const searchButton = document.getElementById('trigger-search');
+const searchInput = document.getElementById('search-card-input');
+
+function searchAndDisplay() {
+   const searchText = searchInput.value || null;
+   let keys = Array.from(cardsMap.keys());
+   if(searchText) {
+      keys = keys.filter(key => key.search(searchText) !== -1);
+      // sorting
+      if(keys.length > 0) {
+         const sortMap = new Map();
+         keys.forEach(key => {
+            const index = key.search(searchText);
+            const array = sortMap.get(index) || [];
+            array.push(key);
+            sortMap.set(index, array);
+         })
+         keys = [];
+         for(const [key, value] of sortMap.entries()) {
+            const array = value;
+            array.sort();
+            keys.push(...array);
+         }
+      }
+   } else {
+      keys.sort();
+   }
+   cardsContainer.innerHTML = '';
+   keys.forEach(key => {
+      createCard(false, key);
+   })
+}
+
 /**
  * 
  * @param {Boolean} isNew
@@ -103,21 +156,21 @@ function createCard(isNew, key, value) {
    if(!key) return -1;
    let text;
    if(isNew) {
-      if(!value) throw new Error('no value is passed');
+      if(!key || !value) throw new Error('no name or value is passed');
       const isAlreadyExist = cardsMap.get(key);
       if(isAlreadyExist) {
-         let canceled = true;
          createPopUp(
             { message: `既にカード名「${key}」は使用されています。上書きしますか？` },
             'いいえ',
             'はい',
             () => {
                cardsMap.set(key, value);
-               text = value;
-               canceled = false;
+               const card = document.getElementById(key);
+               const description = card.querySelector('.description');
+               description.innerText = value;
             }
          )
-         if(canceled) return;
+         return;
       } else {
          cardsMap.set(key, value);
          text = value;
@@ -128,6 +181,7 @@ function createCard(isNew, key, value) {
    const cloneCard = cardTemplate.content.cloneNode(true);
    const node = cloneCard.querySelector('.cards-box');
    const card = cloneCard.querySelector('.cards');
+   card.id = key;
 
    // SET TEXT
    const cardTitle = cloneCard.querySelector('.title');
@@ -137,7 +191,7 @@ function createCard(isNew, key, value) {
    const cardDescription = cloneCard.querySelector('.description');
    cardDescription.innerText = text;
 
-   // ADD CHECK EVENT
+   // ADD ANIMATION
    card.addEventListener('click', e => {
       const checkedCards = document.querySelectorAll('.cards.checked');
       const alreadyChecked = card.classList.contains('checked');
@@ -156,10 +210,54 @@ function createCard(isNew, key, value) {
 
    // EDIT CARD
    const cardEdit = cloneCard.querySelector('.edit');
+   cardEdit.addEventListener('click', e => {
+      function handle_empty() {
+         const div = document.createElement('div');
+         div.classList.add('flex-column');
+         const h3 = document.createElement('h3');
+         h3.innerText = key;
+         const textarea = document.createElement('textarea');
+         textarea.value = cardsMap.get(key);
+         div.appendChild(h3);
+         div.appendChild(textarea);
+         createPopUp(
+            { element: div },
+            '破棄',
+            '保存',
+            () => {
+               if(textarea.value) {
+                  cardDescription.innerText = textarea.value;
+                  cardsMap.set(key, textarea.value);
+               } else {
+                  createPopUp(
+                     { message: 'テキストを入力していません。' },
+                     '戻る',
+                     '修正',
+                     () => {
+                        handle_empty();
+                     }
+                  );
+               }
+            }
+         );
+      }
+      handle_empty();
+   })
 
    // DELETE CARD
    const cardDelete = cloneCard.querySelector('.delete');
-   deleteButton(cardDelete, cardsContainer, node, key);
+   cardDelete.addEventListener('click', e => {
+      // console.log(node)
+      createPopUp(
+         { message: `本当にカード:'${key}'を削除しますか？` },
+         'いいえ',
+         'はい',
+         () => {
+            cardsContainer.removeChild(node);
+            cardsMap.delete(key);
+         }
+      )
+   })
 
    // APPEND
    cardsContainer.appendChild(cloneCard);
@@ -214,26 +312,6 @@ function flipCard(card, frontToBack) {
          clearInterval(flip);
       }
    }, speed)
-}
-
-/**
- * @param {HTMLButtonElement} button button element
- * @param {HTMLElement} parentNode cards container
- * @param {HTMLElement} node card to delete
- */
-function deleteButton(button, parentNode, node, cardName) {
-   button.addEventListener('click', e => {
-      // console.log(node)
-      createPopUp(
-         { message: `本当にカード:'${cardName}'を削除しますか？` },
-         'いいえ',
-         'はい',
-         () => {
-            parentNode.removeChild(node);
-            cardsMap.delete(cardName);
-         }
-      )
-   })
 }
 
 /**
