@@ -29,22 +29,22 @@
       <img width="25px" height="25px" src="./images/clipboard-question-solid.svg" alt="icon">
    </button>
    <template id="cards-box-tmp">
-      <div class="cards-box">
+      <div class="cards-box flex">
          <div class="cards">
-            <div class="wrapper flex-column">
-               <span>
+            <!-- <div class="wrapper flex-column"> -->
+               <span class="front">
                   <h3 class="title">{title}</h3>
                </span>
-               <span>
+               <span class="back hide">
                   <p class="description">{description}</p>
+                  <!-- </div> -->
+                  <button class="edit">
+                     <img src="./images/pen-to-square-solid.svg" width="20px" height="20px" alt="icon">
+                  </button>
+                  <button class="delete">
+                     <img src="./images/trash-can-solid.svg" width="20px" height="20px" alt="icon">
+                  </button>
                </span>
-            </div>
-            <button class="edit hide">
-               <img src="./images/pen-to-square-solid.svg" width="20px" height="20px" alt="icon">
-            </button>
-            <button class="delete hide">
-               <img src="./images/trash-can-solid.svg" width="20px" height="20px" alt="icon">
-            </button>
          </div>
       </div>
    </template>

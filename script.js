@@ -53,11 +53,11 @@ document.addEventListener('click', e => {
       }
    })
    if(!containsCard) {
-      const card = document.querySelector('.cards.checked');
-      if(card){
-         card.classList.remove('checked');
-         const buttons = card.getElementsByTagName('button');
-         Array.from(buttons).forEach(b => b.classList.add('hide'));
+      const checkedCards = document.querySelectorAll('.cards.checked');
+      if(checkedCards.length > 0){
+         Array.from(checkedCards).forEach(checkedCard => {
+            flipCard(checkedCard, false);
+         })
       }
    }
 })
@@ -66,31 +66,21 @@ document.addEventListener('click', e => {
 //::: ADD CARDS ::://
 const addButton = document.getElementById('add-card');
 addButton.addEventListener('click', e => {
-   // const div = document.createElement('div');
-   // div.className = 'flex-column';
-   // // Title
-   // const inputTitle = document.createElement('input');
-   // inputTitle.setAttribute('placeholder', 'name');
-   // inputTitle.setAttribute('type', 'text');
-   // // Discription
-   // const inputDescription = document.createElement('textarea');
-   // inputDescription.setAttribute('placeholder', 'discription/definition/etc')
-   // div.appendChild(inputTitle);
-   // div.appendChild(inputDescription);
    const cloneInputForm = inputFormTemplate.content.cloneNode(true);
    const div = cloneInputForm.querySelector('.input-layout');
    const id = (Math.random()*10000).toString(16).replace('.', '');
    const label = cloneInputForm.querySelector('label');
-   const inputText = cloneInputForm.querySelector('input[type=text]');
-   inputText.id = id;
+   const inputTitle = cloneInputForm.querySelector('input[type=text]');
+   const textareaDescription = cloneInputForm.querySelector('textarea');
+   inputTitle.id = id;
    label.setAttribute('for', id);
    createPopUp(
       { element: div },
       '破棄',
       '追加',
       () => {
-         if(inputTitle.value && inputDescription.value) {
-            createCard(true, inputTitle.value, inputDescription.value)
+         if(inputTitle.value && textareaDescription.value) {
+            createCard(true, inputTitle.value, textareaDescription.value)
          }
       }
    )
@@ -123,6 +113,7 @@ function createCard(isNew, key, value) {
             'はい',
             () => {
                cardsMap.set(key, value);
+               text = value;
                canceled = false;
             }
          )
@@ -148,15 +139,19 @@ function createCard(isNew, key, value) {
 
    // ADD CHECK EVENT
    card.addEventListener('click', e => {
-      const checkedCard = document.querySelector('.cards.checked');
-      if(checkedCard) {
-         checkedCard.classList.remove('checked');
-         const buttons = checkedCard.getElementsByTagName('button');
-         Array.from(buttons).forEach(b => b.classList.add('hide'));
+      const checkedCards = document.querySelectorAll('.cards.checked');
+      const alreadyChecked = card.classList.contains('checked');
+      if(checkedCards.length > 0 && !alreadyChecked) {
+         // delay
+         Array.from(checkedCards).forEach(checkedCard => {
+            setTimeout(() => {
+               flipCard(checkedCard, false);
+            }, 500);
+         })
       }
-      const buttons = card.getElementsByTagName('button');
-      Array.from(buttons).forEach(b => b.classList.remove('hide'));
-      card.classList.add('checked');
+      if(!alreadyChecked) {
+         flipCard(card, true);
+      }
    })
 
    // EDIT CARD
@@ -168,6 +163,57 @@ function createCard(isNew, key, value) {
 
    // APPEND
    cardsContainer.appendChild(cloneCard);
+}
+
+/**
+ * 
+ * @param {HTMLElement} card 
+ * @param {Boolean} frontToBack
+ */
+function flipCard(card, frontToBack) {
+   if(!card) return;
+   let speed = 10;
+   const frontFace = card.querySelector('.front');
+   const backFace = card.querySelector('.back');
+   const buttons = backFace.getElementsByTagName('button');
+   Array.from(buttons).forEach(b => b.classList.add('hide'));
+
+   // rotate 180
+   let rotation = frontToBack ? 0 : 180;
+   let rotate = frontToBack ? 5 : -5;
+   let flipped = false;
+   let flip = setInterval(() => {
+      rotation += rotate;
+      card.style.transform = `rotateY(${rotation}deg)`;
+      frontFace.style.transform = `rotateY(${rotation}deg)`;
+      backFace.style.transform = `rotateY(${rotation}deg)`;
+      // hide other face
+      if((rotation >= 90 && frontToBack && !flipped) ||
+         (rotation <= 90 && !frontToBack && !flipped)) {
+         flipped = true;
+         frontToBack ?
+            (() => {
+               card.classList.add('checked')
+               backFace.classList.remove('hide')
+               frontFace.classList.add('hide')
+            })()
+         :
+            (() => {
+               card.classList.remove('checked');
+               backFace.classList.add('hide')
+               frontFace.classList.remove('hide')
+            })()
+      }
+      if((rotation >= 180 && frontToBack) ||
+         (rotation <= 0 && !frontToBack)) {
+         // if the rotation went over 180, set back to 180
+         rotation = frontToBack ? 180 : 0;
+         frontFace.style.transform = `rotateY(${rotation}deg)`;
+         backFace.style.transform = `rotateY(${rotation}deg)`;
+         Array.from(buttons).forEach(b => b.classList.remove('hide'));
+         clearInterval(flip);
+      }
+   }, speed)
 }
 
 /**
@@ -184,6 +230,7 @@ function deleteButton(button, parentNode, node, cardName) {
          'はい',
          () => {
             parentNode.removeChild(node);
+            cardsMap.delete(cardName);
          }
       )
    })
