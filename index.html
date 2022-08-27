@@ -11,24 +11,48 @@
    <link rel="stylesheet" href="./quiz.css">
 </head>
 <body>
-   <div class="background"></div>
-   <div class="container flex-column">
-      <div class="search-bar flex">
-         <input type="text" id="search-card-input" placeholder="search">
-         <button id="trigger-search">
-            <img width="20px" height="20px" src="./images/magnifying-glass-solid.svg" alt="icon">
-         </button>
+   <div id="root">
+      <div class="background"></div>
+      <div class="container flex-column" id="main">
+         <div class="search-bar flex">
+            <input type="text" id="search-card-input" placeholder="search">
+            <button id="trigger-search">
+               <img width="20px" height="20px" src="./images/magnifying-glass-solid.svg" alt="icon">
+            </button>
+         </div>
+         <div id="cards-container" class="flex">
+            <!-- script -->
+         </div>
       </div>
-      <div id="cards-container" class="flex">
-
+      <div id="quiz-section" class="container flex-column hide">
+         <div class="question-container">
+            <h2 class="question-text">
+               {question}
+            </h2>
+            <canvas id="time-bar" width="100%" height="10px" style="width: 100%; height: 10px;"></canvas>
+         </div>
+         <div id="answers-container" class="answers-container flex">
+            <div>
+               <button class="answer-btn">{answer1}</button>
+            </div>
+            <div>
+               <button class="answer-btn">{answer2}</button>
+            </div>
+            <div>
+               <button class="answer-btn">{answer3}</button>
+            </div>
+            <div>
+               <button class="answer-btn">{answer4}</button>
+            </div>
+         </div>
       </div>
+      <button class="floating-btn" id="add-card">
+         <img width="25px" height="25px" src="./images/square-plus-solid.svg" alt="icon">
+      </button>
+      <button class="floating-btn" id="start-quiz">
+         <img width="25px" height="25px" src="./images/clipboard-question-solid.svg" alt="icon">
+      </button>
    </div>
-   <button class="floating-btn" id="add-card">
-      <img width="25px" height="25px" src="./images/square-plus-solid.svg" alt="icon">
-   </button>
-   <button class="floating-btn" id="start-quiz">
-      <img width="25px" height="25px" src="./images/clipboard-question-solid.svg" alt="icon">
-   </button>
    <template id="cards-box-tmp">
       <div class="cards-box flex">
          <div class="cards">
@@ -65,9 +89,18 @@
          <textarea maxlength="250"></textarea>
       </div>
    </template>
-   <template id="quiz-tmp">
-      <div class="quiz">
-
+   <template id="quiz-multiple-choices-tmp">
+      <div>
+         <button class="answer-btn">{answer1}</button>
+      </div>
+      <div>
+         <button class="answer-btn">{answer2}</button>
+      </div>
+      <div>
+         <button class="answer-btn">{answer3}</button>
+      </div>
+      <div>
+         <button class="answer-btn">{answer4}</button>
       </div>
    </template>
    <script src="script.js"></script>

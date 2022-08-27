@@ -1,8 +1,63 @@
+:root {
+   --answer-btn-font-size: 25px;
+   --answer-btn-color-1: rgb(23, 172, 0);
+   --answer-btn-hover-color-1: rgb(18, 133, 0);
+   --answer-btn-color-2: rgb(0, 25, 184);
+   --answer-btn-hover-color-2: rgb(0, 19, 140);
+   --answer-btn-color-3: rgb(200, 177, 1);
+   --answer-btn-hover-color-3: rgb(153, 135, 0);
+   --answer-btn-color-4: rgb(183, 0, 0);
+   --answer-btn-hover-color-4: rgb(137, 0, 0);
+}
+
 .quiz {
-   position: absolute;
+   position: relative;
    top: 0;
    left: 0;
-   background-color: white;
    width: 100vw;
    height: 100vh;
+   align-items: center;
+   justify-content: center;
 }
+
+.question-container {
+   height: 400px;
+}
+.answers-container {
+   flex: 1;
+   flex-wrap: wrap;
+   max-width: 800px;
+   margin: auto;
+   align-items: flex-start;
+   justify-content: flex-start;
+}
+.answers-container div {
+   flex: 0 1 350px;
+   height: 100px;
+   margin: auto;
+   position: relative;
+}
+.answer-btn {
+   position: relative;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   cursor: pointer;
+   padding: 10px;
+   height: 80px;
+   width: 330px;
+   font-weight: 500;
+   color: white;
+   font-size: var(--answer-btn-font-size);
+}
+.answers-container div:nth-child(1) .answer-btn { background-color: var(--answer-btn-color-1);}
+.answers-container div:nth-child(1) .answer-btn:hover { background-color: var(--answer-btn-hover-color-1) !important;}
+
+.answers-container div:nth-child(2) .answer-btn { background-color: var(--answer-btn-color-2);}
+.answers-container div:nth-child(2) .answer-btn:hover { background-color: var(--answer-btn-hover-color-2);}
+
+.answers-container div:nth-child(3) .answer-btn { background-color: var(--answer-btn-color-3);}
+.answers-container div:nth-child(3) .answer-btn:hover { background-color: var(--answer-btn-hover-color-3);}
+
+.answers-container div:nth-child(4) .answer-btn { background-color: var(--answer-btn-color-4);}
+.answers-container div:nth-child(4) .answer-btn:hover { background-color: var(--answer-btn-hover-color-4);}

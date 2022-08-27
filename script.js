@@ -26,7 +26,6 @@ const cardsMap = new Map([
    ['invent', '…を発明する'],
    ['lead', '…の先頭に立つ'],
    ['maintain', '…を維持する'],
-
 ]);
 
 
@@ -123,6 +122,14 @@ addButton.addEventListener('click', e => {
 //::: ADD QUIZ ::://
 const quizButton = document.getElementById('start-quiz');
 quizButton.addEventListener('click', e => {
+   // minimum of 4 cards required to start a quiz
+   if(cardsMap.size < 4) {
+      createPopUp({
+         message: 'カード数が４つ以上ないとクイズは出来ません。',
+         confirmText: '戻る'
+      }, ()=>{})
+      return;
+   }
    const div = document.createElement('div');
    const id = (Math.random()*10000).toString(16).replace('.', '');
    const label = document.createElement('label');
@@ -130,6 +137,9 @@ quizButton.addEventListener('click', e => {
    label.setAttribute('for', id);
    const input = document.createElement('input');
    input.type = 'number';
+   input.min = 1;
+   input.max = 100;
+   input.value = 1;
    input.id = id;
    div.appendChild(label);
    div.appendChild(input);
@@ -149,20 +159,27 @@ quizButton.addEventListener('click', e => {
                   startQuiz(input.value)
                }
             )
+         } else if(input.value < 1) {
+            createPopUp({
+               message: 'クイズは１問以上１００問以下でないと出来ません。',
+               confirmText: '戻る'
+            })
          }
-         startQuiz(input.value);
+         else startQuiz(input.value);
       }
    )
 })
 });
 
-const body = document.getElementsByTagName('body')[0];
+const root = document.getElementById('root');
 const cardsContainer = document.getElementById('cards-container');
+const quizSection = document.getElementById('quiz-section');
+const answersContainer = document.getElementById('answers-container');
 const template = {
    CARD: document.getElementById('cards-box-tmp').content,
    POP_UP: document.getElementById('pop-up-tmp').content,
    INPUT_FORM: document.getElementById('input-tmp').content,
-   QUIZ: document.getElementById('quiz-tmp').content
+   QUIZ: document.getElementById('quiz-multiple-choices-tmp').content
 }
 Object.freeze(template);
 
@@ -208,6 +225,21 @@ function searchAndDisplay() {
    })
 }
 
+function hasUnwantedCharacter(title, description) {
+   const hasCharacter = {
+      inTitle: title.search(/#|<|>|%|\*/g) !== -1,
+      inDescription: description.search(/#|<|>|%|\*/g) !== -1
+   }
+   if(hasCharacter.inTitle || hasCharacter.inDescription) {
+      createPopUp({ 
+         message: '「# < > % *」のキャラクターを使わないでください。',
+         confirmText: '戻る'
+      }, ()=>{})
+      return true;
+   }
+   return false;
+}
+
 /**
  * 
  * @param {Boolean} isNew
@@ -222,34 +254,26 @@ function createCard(isNew, key, value, highlight) {
    if(isNew) {
       if(!key || !value) throw new Error('no name or value is passed');
       // prevent XSS or create HTML element
-      const hasCharacter = key.search(/#|<|>|%|\*/g) !== -1;
-      if(hasCharacter) {
-         createPopUp({ 
-            message: '「# < > % *」のキャラクターを使わないでください。',
-            confirmText: '戻る'
-         },
-            ()=>{}
-         )
-         return;
-      }
-      const isAlreadyExist = cardsMap.get(key);
-      if(isAlreadyExist) {
-         createPopUp({ 
-            message: `既にカード名「${key}」は使用されています。上書きしますか？`,
-            declineText: 'いいえ',
-            confirmText: 'はい'
-         },
-            () => {
-               cardsMap.set(key, value);
-               const card = document.getElementById(key);
-               const description = card.querySelector('.description');
-               description.innerText = value;
-            }
-         )
-         return;
-      } else {
-         cardsMap.set(key, value);
-         text = value;
+      if(!hasUnwantedCharacter(key, value)){
+         const isAlreadyExist = cardsMap.get(key);
+         if(isAlreadyExist) {
+            createPopUp({ 
+               message: `既にカード名「${key}」は使用されています。上書きしますか？`,
+               declineText: 'いいえ',
+               confirmText: 'はい'
+            },
+               () => {
+                  cardsMap.set(key, value);
+                  const card = document.getElementById(key);
+                  const description = card.querySelector('.description');
+                  description.innerText = value;
+               }
+            )
+            return;
+         } else {
+            cardsMap.set(key, value);
+            text = value;
+         }
       }
    } else {
       text = cardsMap.get(key); 
@@ -281,7 +305,7 @@ function createCard(isNew, key, value, highlight) {
          Array.from(checkedCards).forEach(checkedCard => {
             setTimeout(() => {
                flipCard(checkedCard, false);
-            }, 500);
+            }, 200);
          })
       }
       if(!alreadyChecked) {
@@ -296,8 +320,8 @@ function createCard(isNew, key, value, highlight) {
          const div = document.createElement('div');
          div.classList.add('flex-column');
          const h3 = document.createElement('h3');
-         h3.innerText = key;
          const textarea = document.createElement('textarea');
+         h3.innerText = key;
          textarea.value = cardsMap.get(key);
          div.appendChild(h3);
          div.appendChild(textarea);
@@ -308,8 +332,10 @@ function createCard(isNew, key, value, highlight) {
          },
             () => {
                if(textarea.value) {
-                  cardDescription.innerText = textarea.value;
-                  cardsMap.set(key, textarea.value);
+                  if(!hasUnwantedCharacter("", textarea.value)) {
+                     cardDescription.innerText = textarea.value;
+                     cardsMap.set(key, textarea.value);
+                  }
                } else {
                   createPopUp({ 
                      message: 'テキストを入力していません。',
@@ -422,7 +448,10 @@ function createPopUp(object, callback) {
       content.innerText = object.message;
    } else if(object.element) {
       content.innerHTML = '';
-      content.appendChild(object.element)
+      typeof object.element == 'string' ?
+         content.innerHTML = object.element
+      :
+         content.appendChild(object.element);
    } else {
       throw new Error('Provide message or element');
    }
@@ -430,8 +459,11 @@ function createPopUp(object, callback) {
    if(!object.confirmText) throw new Error('Needs to provide at least confirmText');
 
    // SET declineText
+   const declineButton = clonePopUp.querySelector('.decline');
    if(object.declineText) {
-      clonePopUp.querySelector('.decline').innerText = object.declineText;
+      declineButton.innerText = object.declineText;
+   } else {
+      declineButton.classList.add('hide');
    }
 
    // SET confirmText
@@ -440,20 +472,95 @@ function createPopUp(object, callback) {
    // HIDE POP UP
    clonePopUp.querySelectorAll('button').forEach(button => {
       button.addEventListener('click', () => {
-         body.removeChild(node);
+         root.removeChild(node);
          // check if it was a confirm button
          if(button.innerText === object.confirmText) 
             callback();
       })
    })
-   body.appendChild(clonePopUp);
+   root.appendChild(clonePopUp);
 }
 
-function startQuiz(numOfQuestions) {
-   const quizTemplate = template.QUIZ.cloneNode(true);
-   const node = quizTemplate.querySelector('.quiz');
-   body.appendChild(node);
-   for(let i=0; i<numOfQuestions; i++) {
 
+function startQuiz(numOfQuestions) {
+   const cardsSection = document.getElementById('main');
+   cardsSection.classList.add('hide');
+
+   const floatingButtons = document.getElementsByClassName('floating-btn');
+   Array.from(floatingButtons).forEach(b => b.classList.add('hide'));
+
+   quizSection.classList.remove('hide');
+   answersContainer.innerHTML = '';
+
+   let keys = Array.from(cardsMap.keys());
+   shuffle(keys);
+   createMultipleChoices(keys, numOfQuestions);
+}
+
+const canvas = document.getElementById('time-bar');
+const ctx = canvas.getContext('2d');
+
+let quizInterval;
+function createMultipleChoices(keys, xtimes) {
+   if(xtimes == 0) return;
+   if(keys.length == 0) {
+      keys = Array.from(cardsMap.keys());
+      shuffle(keys);
+   }
+   const multipleChoiceTemplate = template.QUIZ.cloneNode(true);
+   const elements = Array.from(multipleChoiceTemplate.querySelectorAll('div'));
+   let buttons = Array.from(multipleChoiceTemplate.querySelectorAll('.answer-btn'));
+   shuffle(buttons);
+
+   const answerKey = keys.splice(Math.floor(Math.random() * keys.length), 1)[0];
+   const answerValue = cardsMap.get(answerKey);
+   document.querySelector('.question-text').innerText = answerValue;
+   // don't want to splice from original keys array so copied instead
+   // want to splice only the right answer
+   let copiedKeys = [...keys];
+   // 4 choices
+   let choices = [answerKey];
+   choices[1] = copiedKeys.splice(Math.floor(Math.random()*copiedKeys.length), 1)[0];
+   choices[2] = copiedKeys.splice(Math.floor(Math.random()*copiedKeys.length), 1)[0];
+   choices[3] = copiedKeys.splice(Math.floor(Math.random()*copiedKeys.length), 1)[0];
+   buttons.forEach((button, index) => {
+      button.innerText = choices[index];
+      button.addEventListener('click', () => {
+         clearInterval(quizInterval);
+         console.log(choices[index]);
+         console.log(choices[index] == answerKey);
+         answersContainer.innerHTML = '';
+         createMultipleChoices(keys, xtimes - 1);
+      })
+   })
+   elements.forEach(element => {
+      answersContainer.appendChild(element);
+   })
+
+   const second = 30;
+   const timeOut = 1000;
+   ctx.fillStyle = '#F1BF55';
+   ctx.fillRect(0, 0, canvas.width, canvas.height);
+   const widthPerMilliSecond = (canvas.width / second) * (timeOut / 1000);
+   let i = 0;
+   quizInterval = setInterval(() => {
+      console.log(i);
+      ctx.fillStyle = 'blue';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const width = canvas.width - i;
+      ctx.fillStyle = '#F1BF55';
+      ctx.fillRect(0, 0, width, canvas.height);
+      i += widthPerMilliSecond;
+   }, timeOut)
+}
+
+function shuffle(array) {
+   let currentIndex = array.length;
+   let randomIndex;
+   while(currentIndex != 0){
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
    }
 }

@@ -157,7 +157,7 @@ button img {
    justify-content: center;
    overflow: scroll;
    border-radius: 15px;
-   background-color: rgba(155, 155, 155, 0.509);
+   background-color: rgba(171, 171, 171, 0.5);
 }
 .cards-box {
    width: var(--cards-box-width);
