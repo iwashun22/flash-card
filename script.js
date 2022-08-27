@@ -96,12 +96,12 @@ searchButton.addEventListener('click', e => {
 //::: ADD CARDS ::://
 const addButton = document.getElementById('add-card');
 addButton.addEventListener('click', e => {
-   const cloneInputForm = template.INPUT_FORM.cloneNode(true);
-   const div = cloneInputForm.querySelector('.input-layout');
-   const id = (Math.random()*10000).toString(16).replace('.', '');
-   const label = cloneInputForm.querySelector('label');
-   const inputTitle = cloneInputForm.querySelector('input[type=text]');
-   const textareaDescription = cloneInputForm.querySelector('textarea');
+   const cloneInputForm = template.INPUT_FORM.cloneNode(true),
+         div = cloneInputForm.querySelector('.input-layout'),
+         id = (Math.random()*10000).toString(16).replace('.', ''),
+         label = cloneInputForm.querySelector('label'),
+         inputTitle = cloneInputForm.querySelector('input[type=text]'),
+         textareaDescription = cloneInputForm.querySelector('textarea');
    inputTitle.id = id;
    label.setAttribute('for', id);
    createPopUp({ 
@@ -113,6 +113,11 @@ addButton.addEventListener('click', e => {
          if(inputTitle.value && textareaDescription.value) {
             createCard(true, inputTitle.value, textareaDescription.value)
             searchAndDisplay();
+         } else {
+            createPopUp({
+               message: 'カード名とテキストを入力してください。',
+               confirmText: '戻る',
+            }, ()=>{})
          }
       }
    )
@@ -141,8 +146,14 @@ quizButton.addEventListener('click', e => {
    input.max = 100;
    input.value = 1;
    input.id = id;
+   const select = document.createElement('select');
+   select.innerHTML = 
+      `<option value="slow">遅い</option>` +
+      `<option value="medium">普通</option>` +
+      `<option value="fast">早い</option>`;
    div.appendChild(label);
    div.appendChild(input);
+   div.appendChild(select);
    createPopUp({ 
       element: div,
       declineText: 'キャンセル',
@@ -156,7 +167,7 @@ quizButton.addEventListener('click', e => {
                confirmText: 'スタート'
             },
                () => {
-                  startQuiz(input.value)
+                  startQuiz(input.value, select.value);
                }
             )
          } else if(input.value < 1) {
@@ -165,7 +176,7 @@ quizButton.addEventListener('click', e => {
                confirmText: '戻る'
             })
          }
-         else startQuiz(input.value);
+         else startQuiz(input.value, select.value);
       }
    )
 })
@@ -482,7 +493,7 @@ function createPopUp(object, callback) {
 }
 
 
-function startQuiz(numOfQuestions) {
+function startQuiz(numOfQuestions, speed) {
    const cardsSection = document.getElementById('main');
    cardsSection.classList.add('hide');
 
@@ -490,23 +501,35 @@ function startQuiz(numOfQuestions) {
    Array.from(floatingButtons).forEach(b => b.classList.add('hide'));
 
    quizSection.classList.remove('hide');
-   answersContainer.innerHTML = '';
 
    let keys = Array.from(cardsMap.keys());
    shuffle(keys);
-   createMultipleChoices(keys, numOfQuestions);
+
+   answersContainer.innerHTML = '';
+
+   let speedInSecond;
+   switch(speed) {
+      case 'slow': speedInSecond = 25; break;
+      case 'medium': speedInSecond = 12; break;
+      case 'fast': speedInSecond = 4; break;
+   }
+   createMultipleChoices(keys, numOfQuestions, speedInSecond);
 }
 
 const canvas = document.getElementById('time-bar');
 const ctx = canvas.getContext('2d');
 
 let quizInterval;
-function createMultipleChoices(keys, xtimes) {
-   if(xtimes == 0) return;
+function createMultipleChoices(keys, xtimes, speedInSecond) {
+   if(xtimes == 0) {
+      returnToCardSection();
+      return;
+   };
    if(keys.length == 0) {
       keys = Array.from(cardsMap.keys());
       shuffle(keys);
    }
+   const second = speedInSecond || 15;
    const multipleChoiceTemplate = template.QUIZ.cloneNode(true);
    const elements = Array.from(multipleChoiceTemplate.querySelectorAll('div'));
    let buttons = Array.from(multipleChoiceTemplate.querySelectorAll('.answer-btn'));
@@ -527,31 +550,81 @@ function createMultipleChoices(keys, xtimes) {
       button.innerText = choices[index];
       button.addEventListener('click', () => {
          clearInterval(quizInterval);
-         console.log(choices[index]);
-         console.log(choices[index] == answerKey);
-         answersContainer.innerHTML = '';
-         createMultipleChoices(keys, xtimes - 1);
+         // console.log(choices[index] == answerKey);
+         const result = choices[index] === answerKey ? '正解' : '不正解';
+         delayBeforeNextQuestion(1000, result, choices[index] === answerKey)
+            .then(() => {
+               answersContainer.innerHTML = '';
+               createMultipleChoices(keys, xtimes - 1, second);
+            })
       })
    })
    elements.forEach(element => {
       answersContainer.appendChild(element);
    })
 
-   const second = 30;
-   const timeOut = 1000;
+   const timeOut = 80;
    ctx.fillStyle = '#F1BF55';
-   ctx.fillRect(0, 0, canvas.width, canvas.height);
-   const widthPerMilliSecond = (canvas.width / second) * (timeOut / 1000);
+   // without this code the canvas width will be 100 because in html it's setted to 100% width
+   const canvasWidth = parseInt(window.getComputedStyle(canvas).width.replace('px', ''));
+   canvas.width = canvasWidth;
+   // console.log(canvas.height);
+   ctx.fillRect(0, 0, canvasWidth, canvas.height);
+   const widthPerMilliSecond = (canvasWidth / second) * (timeOut / 1000);
    let i = 0;
    quizInterval = setInterval(() => {
-      console.log(i);
-      ctx.fillStyle = 'blue';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      const width = canvas.width - i;
+      if(i >= canvasWidth) {
+         clearInterval(quizInterval);
+         delayBeforeNextQuestion(1000, '時間切れ', false)
+            .then(() => {
+               answersContainer.innerHTML = '';
+               createMultipleChoices(keys, xtimes - 1, second);
+            })
+      }
+      ctx.clearRect(0, 0, canvasWidth, canvas.height);
+      const width = canvasWidth - i;
       ctx.fillStyle = '#F1BF55';
       ctx.fillRect(0, 0, width, canvas.height);
       i += widthPerMilliSecond;
    }, timeOut)
+}
+
+function returnToCardSection() {
+   const cardsSection = document.getElementById('main');
+   cardsSection.classList.remove('hide');
+
+   Array.from(document.getElementsByClassName('floating-btn')).forEach(b => b.classList.remove('hide'));
+
+   quizSection.classList.add('hide');
+}
+
+/**
+ * 
+ * @param {Number} ms milliseconds 
+ * @param {String} resultText 
+ * @param {Boolean} correct
+ * @returns {Promise}
+ */
+function delayBeforeNextQuestion(ms, resultText, correct) {
+   return new Promise((resolve, reject) => {
+      const blockFilter = document.createElement('div');
+      blockFilter.classList.add('block-filter');
+      const popUpDiv = document.createElement('div');
+      popUpDiv.innerHTML = `<h3>${resultText}</h3>`
+      popUpDiv.classList.add('result');
+      if(correct != null) {
+         correct ?
+            popUpDiv.classList.add('correct')
+         :
+            popUpDiv.classList.add('wrong');
+      }
+      blockFilter.appendChild(popUpDiv);
+      root.appendChild(blockFilter);
+      setTimeout(() => {
+         root.removeChild(blockFilter);
+         resolve();
+      }, ms)
+   })
 }
 
 function shuffle(array) {

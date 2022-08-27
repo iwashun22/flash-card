@@ -61,3 +61,20 @@
 
 .answers-container div:nth-child(4) .answer-btn { background-color: var(--answer-btn-color-4);}
 .answers-container div:nth-child(4) .answer-btn:hover { background-color: var(--answer-btn-hover-color-4);}
+
+.result {
+   display: block;
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   min-width: 400px;
+   height: 80px;
+   background-color: rgb(255, 255, 255);
+}
+.result.correct {
+   background-color: green;
+}
+.result.wrong {
+   background-color: red;
+}

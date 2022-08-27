@@ -73,17 +73,17 @@
 }
 #start-quiz {
    bottom: 10px;
-   background-color: rgb(0, 132, 255);
+   background-color: rgb(46, 148, 243);
 }
 #start-quiz:hover {
-   background-color: rgb(0, 60, 255);
+   background-color: rgb(43, 77, 188);
 }
 #add-card {
    bottom: calc(var(--floating-button-size) + 20px);
-   background-color: rgb(255, 51, 51);
+   background-color: rgb(85, 210, 95);
 }
 #add-card:hover {
-   background-color: rgb(218, 0, 0);
+   background-color: rgb(55, 158, 63);
 }
 
 
