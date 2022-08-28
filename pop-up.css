@@ -36,7 +36,7 @@
 }
 .pop-up input, .pop-up textarea {
    border: 2px black solid;
-   margin: 10px 0;
+   margin: 10px 5px;
    border-radius: 20px;
    font-size: 20px;
 }

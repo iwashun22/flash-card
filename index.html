@@ -25,11 +25,18 @@
          </div>
       </div>
       <div id="quiz-section" class="container flex-column hide">
-         <div class="question-container">
-            <h2 class="question-text">
-               {question}
-            </h2>
-            <canvas id="time-bar" width="100%" height="10px" style="width: 100%; height: 10px;"></canvas>
+         <button id="finish-quiz" class="floating-btn">
+            <img width="25px" height="25px" src="./images/rectangle-xmark-solid.svg" alt="">
+         </button>
+         <div class="question-container flex-column">
+            <div class="question-text-container">
+               <h2 class="question-text">
+                  {question}
+               </h2>
+            </div>
+            <div class="question-timer-container">
+               <canvas id="time-bar" width="100%" height="10px" style="width: 100%; height: 10px;"></canvas>
+            </div>
          </div>
          <div id="answers-container" class="answers-container flex">
             <div>
