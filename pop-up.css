@@ -50,6 +50,9 @@
    text-align: center;
    min-width: 100px;
 }
+.danger {
+   color: red;
+}
 .pop-up textarea {
    padding: 10px;
    min-height: 200px;

@@ -27,7 +27,7 @@
 }
 
 .question-container {
-   height: 400px;
+   flex: 0 0 400px;
    padding-top: 40px;
    background-color: var(--question-container-background);
    border-radius: 20px;
@@ -102,6 +102,7 @@
    border-radius: 15px;
    text-align: center;
    line-height: var(--result-pop-up-height);
+   box-sizing: content-box;
    font-size: 30px;
 }
 .result.correct {

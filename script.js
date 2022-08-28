@@ -5,27 +5,27 @@ const cardsMap = new Map([
    ['accept', '…を受け入れる'], 
    ['achieve', '…を達成する'],
    ['acquire', '…を身につける'],
-   // ['affect', '…に影響を与える'],
-   // ['agree', '同意する'],
-   // ['allow', '…を許可する'],
-   // ['belong', '属する'],
-   // ['care', '気にかける (I care)\n注意 (take care)\n関心 (care about)'],
-   // ['compare', '…を比較する'],
-   // ['consider', '…について考える'],
-   // ['consume', '…を消費する'],
-   // ['decline', '…を断る'],
-   // ['depend', '依存する\n次第である'],
-   // ['encourage', '…を励ます\n…を助長する'],
-   // ['expect', '…を予想する\n…を期待する'],
-   // ['fear', '…を恐れる\n恐れ'],
-   // ['feed', '…に食べ物を与える\n…を養う'],
-   // ['gather', '…を集める\n集まる'],
-   // ['guess', '…を推測する'],
-   // ['hurt', '…を傷つける'],
-   // ['introduce', '…を紹介する'],
-   // ['invent', '…を発明する'],
-   // ['lead', '…の先頭に立つ'],
-   // ['maintain', '…を維持する'],
+   ['affect', '…に影響を与える'],
+   ['agree', '同意する'],
+   ['allow', '…を許可する'],
+   ['belong', '属する'],
+   ['care', '気にかける (I care)\n注意 (take care)\n関心 (care about)'],
+   ['compare', '…を比較する'],
+   ['consider', '…について考える'],
+   ['consume', '…を消費する'],
+   ['decline', '…を断る'],
+   ['depend', '依存する\n次第である'],
+   ['encourage', '…を励ます\n…を助長する'],
+   ['expect', '…を予想する\n…を期待する'],
+   ['fear', '…を恐れる\n恐れ'],
+   ['feed', '…に食べ物を与える\n…を養う'],
+   ['gather', '…を集める\n集まる'],
+   ['guess', '…を推測する'],
+   ['hurt', '…を傷つける'],
+   ['introduce', '…を紹介する'],
+   ['invent', '…を発明する'],
+   ['lead', '…の先頭に立つ'],
+   ['maintain', '…を維持する'],
 ]);
 
 
@@ -121,6 +121,31 @@ addButton.addEventListener('click', e => {
                message: 'カード名とテキストを入力してください。',
                confirmText: '戻る',
             }, ()=>{})
+         }
+      }
+   )
+})
+
+
+//::: DELETE ALL CARDS ::://
+const deleteAllButton = document.getElementById('delete-all-cards');
+deleteAllButton.addEventListener('click', e => {
+   const id = (Math.random()*10000).toString(16).replace('.', '');
+   const html =
+      '<div class="flex-column">' +
+         `<h3>全てのカードが削除されます。「confirm」と入力して承認してください。</h3>` +
+         `<input type="text" class="danger" id="${id}"/>`
+      '</div>';
+   createPopUp({
+      element: html,
+      declineText: '拒否',
+      confirmText: '承認'
+   },
+      () => {
+         const confirm = document.getElementById(id).value;
+         if(confirm === "confirm") {
+            cardsContainer.innerHTML = '';
+            cardsMap.clear();
          }
       }
    )
@@ -494,12 +519,13 @@ function createPopUp(object, handleConfirm, handleDecline) {
    // HIDE POP UP
    clonePopUp.querySelectorAll('button').forEach(button => {
       button.addEventListener('click', () => {
-         root.removeChild(node);
          // check if it was a confirm button
          if(button.innerText === object.confirmText) 
             handleConfirm();
          else if(button.innerText === object.declineText && handleDecline != null)
             handleDecline();
+
+         root.removeChild(node);
       })
    })
    root.appendChild(clonePopUp);
@@ -530,7 +556,7 @@ function startQuiz(numOfQuestions, speed) {
       case 'medium': speedInSecond = 12; break;
       case 'fast': speedInSecond = 4; break;
    }
-   createMultipleChoices(keys, [], numOfQuestions, speedInSecond);
+   createMultipleChoices(keys, [], numOfQuestions, speedInSecond, [], numOfQuestions);
 }
 
 const quitButton = document.getElementById('finish-quiz');
@@ -538,9 +564,25 @@ const canvas = document.getElementById('time-bar');
 const ctx = canvas.getContext('2d');
 
 let quizInterval;
-function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond) {
+/**
+ * 
+ * @param {Array<string>} keys 
+ * @param {Array<string>} alreadyAnsweredKeys 
+ * @param {Number} xtimes numbers to repeat
+ * @param {Number} speedInSecond duration of time limit
+ * @param {Array<any>} correctAnswers array
+ * @param {Number} totalQuestions total number
+ */
+function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond, correctAnswers, totalQuestions) {
    if(xtimes == 0) {
-      returnToCardSection();
+      const getHalfAnswersRight =  Math.ceil(totalQuestions / 2) <= correctAnswers.length;
+      delayBeforeNextQuestion(
+         2000, 
+         `${correctAnswers.length} / ${totalQuestions} 正解！`,
+         getHalfAnswersRight
+      ).then(() => {
+         returnToCardSection();
+      })
       return;
    };
    if(keys.length == 0) {
@@ -552,15 +594,19 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond)
    quitButton.addEventListener('click', handlePauseAndQuit);
    function handlePauseAndQuit(e) {
       clearInterval(quizInterval);
+      // prevent cheating
+      buttons.forEach(b => { b.classList.add('hide'); })
       createPopUp({
          message: '本当にやめますか？',
          declineText: '戻る',
          confirmText: '終了'
       }, () => {
+            answersContainer.innerHTML = '';
             returnToCardSection();
             quitButton.removeEventListener('click', handlePauseAndQuit);
          },
          () => {
+            buttons.forEach(b => { b.classList.remove('hide'); })
             quizInterval = runTimeBar(i);
          }
       );
@@ -595,12 +641,15 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond)
          clearInterval(quizInterval);
          // console.log(choices[index] == answerKey);
          const isCorrect = choices[index] === answerKey;
+         if(isCorrect) {
+            correctAnswers.push(0);
+         }
          const result = isCorrect ? '正解' : '不正解';
          delayBeforeNextQuestion(1000, result, isCorrect)
             .then(() => {
                answersContainer.innerHTML = '';
                quitButton.removeEventListener('click', handlePauseAndQuit);
-               createMultipleChoices(keys, alreadyAnsweredKeys, xtimes - 1, second);
+               createMultipleChoices(keys, alreadyAnsweredKeys, xtimes - 1, second, correctAnswers, totalQuestions);
             })
       })
    })
@@ -618,6 +667,21 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond)
    const widthPerMilliSecond = (canvasWidth / second) * (timeOut / 1000);
    let i = 0;
    quizInterval = runTimeBar(i);
+   // green to red
+   // baseColor must have green or blue color
+   const baseColor = {
+      red: 90,
+      green: 230,
+      blue: 60
+   }
+   // finalColor must have red color
+   const finalColor = {
+      red: 230,
+      green: 60,
+      blue: 60
+   }
+   const gap = Math.abs(baseColor.red-finalColor.red) + Math.abs(baseColor.green-finalColor.green) + Math.abs(baseColor.blue-finalColor.blue);
+   const colorChangePerMilliSecond = (gap / second) * (timeOut / 1000);
    function runTimeBar(widthGone) {
       i = widthGone;
       return setInterval(() => {
@@ -627,12 +691,28 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond)
                .then(() => {
                   answersContainer.innerHTML = '';
                   quitButton.removeEventListener('click', handlePauseAndQuit);
-                  createMultipleChoices(keys, alreadyAnsweredKeys, xtimes - 1, second);
+                  createMultipleChoices(keys, alreadyAnsweredKeys, xtimes - 1, second, correctAnswers, totalQuestions);
                })
          }
          ctx.clearRect(0, 0, canvasWidth, canvas.height);
          const width = canvasWidth - i;
-         ctx.fillStyle = '#F1BF55';
+         if(baseColor.red >= finalColor.red) {
+            baseColor.red = finalColor.red;
+            if(baseColor.green <= finalColor.green) {
+               baseColor.green = finalColor.green;
+               if(baseColor.blue <= finalColor.blue) {   
+                  baseColor.blue = finalColor.blue;
+               } else {
+                  baseColor.blue -= colorChangePerMilliSecond;
+               }
+            } else {
+               baseColor.green -= colorChangePerMilliSecond;
+            }
+         } else {
+            baseColor.red += colorChangePerMilliSecond;
+         }
+         const color = `rgb(${baseColor.red}, ${baseColor.green}, ${baseColor.blue})`
+         ctx.fillStyle = color;
          ctx.fillRect(0, 0, width, canvas.height);
          i += widthPerMilliSecond;
       }, timeOut)

@@ -1,7 +1,8 @@
 :root {
-   --search-bar-border-color: rgb(222, 144, 0);
-   --search-bar-border-hover-color: rgb(255, 185, 56);
+   --search-bar-border-color: rgb(0, 206, 202);
+   --search-bar-border-hover-color: rgb(0, 234, 255);
    --floating-button-size: 60px;
+   --floating-button-spacing: 10px;
    --cards-box-width: 300px;
    --cards-box-height: 200px;
    --cards-width: 280px;
@@ -13,10 +14,14 @@
    --cards-hover-background-color: rgb(200, 148, 51);
    --cards-checked-background-color: rgb(255, 228, 178);
    --cards-button-size: 35px;
-   --cards-delete-button-color: red;
-   --cards-delete-button-hover-color: rgb(170, 0, 0);
-   --cards-edit-button-color: rgb(0, 205, 78);
-   --cards-edit-button-hover-color: rgb(11, 134, 0);
+   --cards-delete-button-color: transparent;
+   /* --cards-delete-button-color: red; */
+   --cards-delete-button-hover-color: rgb(255, 169, 169);
+   /* --cards-delete-button-hover-color: rgb(170, 0, 0); */
+   --cards-edit-button-color: transparent;
+   /* --cards-edit-button-color: rgb(0, 205, 78); */
+   --cards-edit-button-hover-color: rgb(205, 255, 191);
+   /* --cards-edit-button-hover-color: rgb(11, 134, 0); */
 }
 
 /* background */
@@ -71,19 +76,28 @@
    border-bottom-right-radius: 15px;
    transition: .2s;
 }
-#start-quiz {
-   bottom: 10px;
-   background-color: rgb(46, 148, 243);
+#delete-all-cards {
+   bottom: calc(var(--floating-button-size) * 2 + var(--floating-button-spacing) * 3);
+   background-color: rgb(247, 62, 62);
 }
-#start-quiz:hover {
-   background-color: rgb(43, 77, 188);
+#delete-all-cards:hover {
+   background-color: rgb(176, 43, 43);
 }
 #add-card {
-   bottom: calc(var(--floating-button-size) + 20px);
-   background-color: rgb(85, 210, 95);
+   bottom: calc(var(--floating-button-size) + var(--floating-button-spacing) * 2);
+   /* background-color: rgb(85, 210, 95); */
+   background-color: rgb(46, 148, 243);
 }
 #add-card:hover {
-   background-color: rgb(55, 158, 63);
+   /* background-color: rgb(55, 158, 63); */
+   background-color: rgb(43, 77, 188);
+}
+#start-quiz {
+   bottom: var(--floating-button-spacing);
+   background-color: rgb(204, 66, 242);
+}
+#start-quiz:hover {
+   background-color: rgb(139, 46, 165);
 }
 
 
@@ -102,7 +116,7 @@
    align-items: center;
 }
 .search-bar input {
-   background-color: white;
+   background-color: rgba(255, 255, 255, 0.7);
    font-size: 20px;
    height: 40px;
    width: 200px;
