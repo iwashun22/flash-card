@@ -219,16 +219,51 @@ quizButton.addEventListener('click', e => {
 
 
 //::: SET AUDIO ::://
+let currentVolume = audioSettingInput.value / 100;
+const toggleVolume = document.getElementById('toggle-volume');
+toggleVolume.addEventListener('click', e => {
+   if(parseInt(audioSettingInput.value) > 0) {
+      audioSettingInput.value = 0;
+      toggleVolume.innerHTML = '';
+      toggleVolume.appendChild(image.volumeOff);
+      for(const key in audio) {
+         audio[key].volume = 0;
+      }
+   } else {
+      audioSettingInput.value = currentVolume * 100;
+      toggleVolume.innerHTML = '';
+      toggleVolume.appendChild(image.volumeOn);
+      for(const key in audio) {
+         audio[key].volume = currentVolume;
+      }
+   }
+})
+
 for(const key in audio) {
    audio[key].volume = parseInt(audioSettingInput.value) / 100;
 }
-audioSettingInput.addEventListener('input', () => {
-   const value = parseInt(audioSettingInput.value)
+audioSettingInput.addEventListener('input', e => {
+   const volume = parseInt(audioSettingInput.value)
+   if(volume != 0) {
+      currentVolume = volume / 100;
+      toggleVolume.innerHTML = '';
+      toggleVolume.appendChild(image.volumeOn);
+   } else {
+      toggleVolume.innerHTML = '';
+      toggleVolume.appendChild(image.volumeOff);
+   }
    for(const key in audio) {
-      audio[key].volume = value / 100;
+      audio[key].volume = volume / 100;
    }
 })
 });
+
+const image = {
+   volumeOn: new Image(25, 25),
+   volumeOff: new Image(25, 25)
+}
+image.volumeOn.src = './images/volume-off-solid.svg';
+image.volumeOff.src = './images/volume-xmark-solid.svg';
 
 const root = document.getElementById('root');
 const cardsContainer = document.getElementById('cards-container');

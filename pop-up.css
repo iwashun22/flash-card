@@ -39,6 +39,7 @@
    margin: 10px 5px;
    border-radius: 20px;
    font-size: 20px;
+   background-color: rgb(255, 250, 180);
 }
 .pop-up input[type=text] {
    line-height: 30px;
@@ -49,6 +50,10 @@
    line-height: 30px;
    text-align: center;
    min-width: 100px;
+}
+.pop-up input[type=number]::-webkit-inner-spin-button,
+.pop-up input[type=number]::-webkit-outer-spin-button {
+   display: none;
 }
 .danger {
    color: red;

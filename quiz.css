@@ -39,6 +39,16 @@
    right: 0;
    padding: 20px;
 }
+.audio-volume button {
+   background-color: transparent;
+   width: 35px;
+   height: 35px;
+   position: relative;
+   border-radius: 50%;
+}
+.audio-volume button:hover {
+   background-color: rgba(0, 0, 0, 0.5);
+}
 #set-audio-volume {
    width: 70px;
    margin-left: 10px;

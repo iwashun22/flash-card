@@ -173,6 +173,9 @@ button img {
    border-radius: 15px;
    background-color: rgba(171, 171, 171, 0.5);
 }
+#cards-container::-webkit-scrollbar {
+   display: none;
+}
 .cards-box {
    width: var(--cards-box-width);
    height: var(--cards-box-height);
