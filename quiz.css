@@ -31,6 +31,17 @@
    padding-top: 40px;
    background-color: var(--question-container-background);
    border-radius: 20px;
+   position: relative;
+}
+.audio-volume {
+   position: absolute;
+   top: 0;
+   right: 0;
+   padding: 20px;
+}
+#set-audio-volume {
+   width: 70px;
+   margin-left: 10px;
 }
 .question-text-container {
    flex: 3;
@@ -115,6 +126,7 @@
 #finish-quiz {
    top: 20px;
    background-color: var(--quit-btn-color);
+   z-index: 1;
 }
 #finish-quiz:hover {
    background-color: var(--quit-btn-hover-color);

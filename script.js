@@ -185,7 +185,8 @@ quizButton.addEventListener('click', e => {
    select.innerHTML = 
       `<option value="slow">遅い</option>` +
       `<option value="medium">普通</option>` +
-      `<option value="fast">早い</option>`;
+      `<option value="fast">速い</option>` +
+      `<option value="very-fast">とても速い</option>`;
    div.appendChild(label);
    div.appendChild(input);
    div.appendChild(select);
@@ -214,6 +215,18 @@ quizButton.addEventListener('click', e => {
          else startQuiz(input.value, select.value);
       }
    )
+})
+
+
+//::: SET AUDIO ::://
+for(const key in audio) {
+   audio[key].volume = parseInt(audioSettingInput.value) / 100;
+}
+audioSettingInput.addEventListener('input', () => {
+   const value = parseInt(audioSettingInput.value)
+   for(const key in audio) {
+      audio[key].volume = value / 100;
+   }
 })
 });
 
@@ -554,7 +567,8 @@ function startQuiz(numOfQuestions, speed) {
    switch(speed) {
       case 'slow': speedInSecond = 25; break;
       case 'medium': speedInSecond = 12; break;
-      case 'fast': speedInSecond = 4; break;
+      case 'fast': speedInSecond = 5; break;
+      case 'very-fast': speedInSecond = 2; break;
    }
    createMultipleChoices(keys, [], numOfQuestions, speedInSecond, [], numOfQuestions);
 }
@@ -562,6 +576,18 @@ function startQuiz(numOfQuestions, speed) {
 const quitButton = document.getElementById('finish-quiz');
 const canvas = document.getElementById('time-bar');
 const ctx = canvas.getContext('2d');
+const audioSettingInput = document.getElementById('set-audio-volume');
+
+const audio = {
+   clockTick: new Audio('./audios/clock-tick.mp3'),
+   wrong: new Audio('./audios/wrong-answer.mp3'),
+   correct: new Audio('./audios/correct-answer.mp3')
+}
+
+function playClockTickAudio(fromStart) {
+   fromStart ? audio.clockTick.currentTime = 0 : null;
+   audio.clockTick.play();
+}
 
 let quizInterval;
 /**
@@ -589,11 +615,14 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
       keys = Array.from(cardsMap.keys());
       shuffle(keys);
    }
+   // play audio
+   playClockTickAudio(true);
 
    // pause : quit button
    quitButton.addEventListener('click', handlePauseAndQuit);
    function handlePauseAndQuit(e) {
       clearInterval(quizInterval);
+      audio.clockTick.pause();
       // prevent cheating
       buttons.forEach(b => { b.classList.add('hide'); })
       createPopUp({
@@ -608,6 +637,7 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
          () => {
             buttons.forEach(b => { b.classList.remove('hide'); })
             quizInterval = runTimeBar(i);
+            playClockTickAudio(false);
          }
       );
    }
@@ -639,10 +669,16 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
       button.innerText = choices[index];
       button.addEventListener('click', () => {
          clearInterval(quizInterval);
+         audio.clockTick.pause();
          // console.log(choices[index] == answerKey);
          const isCorrect = choices[index] === answerKey;
          if(isCorrect) {
             correctAnswers.push(0);
+            audio.correct.currentTime = 0;
+            audio.correct.play();
+         } else {
+            audio.wrong.currentTime = 0;
+            audio.wrong.play();
          }
          const result = isCorrect ? '正解' : '不正解';
          delayBeforeNextQuestion(1000, result, isCorrect)
@@ -666,27 +702,38 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
    ctx.fillRect(0, 0, canvasWidth, canvas.height);
    const widthPerMilliSecond = (canvasWidth / second) * (timeOut / 1000);
    let i = 0;
-   quizInterval = runTimeBar(i);
    // green to red
    // baseColor must have green or blue color
    const baseColor = {
       red: 90,
+      currentRed: 90,
       green: 230,
-      blue: 60
+      currentGreen: 230,
+      blue: 60,
+      currentBlue: 60
    }
+   Object.freeze(baseColor.red);
+   Object.freeze(baseColor.green);
+   Object.freeze(baseColor.blue);
    // finalColor must have red color
    const finalColor = {
       red: 230,
       green: 60,
       blue: 60
    }
-   const gap = Math.abs(baseColor.red-finalColor.red) + Math.abs(baseColor.green-finalColor.green) + Math.abs(baseColor.blue-finalColor.blue);
-   const colorChangePerMilliSecond = (gap / second) * (timeOut / 1000);
+   Object.freeze(finalColor);
+   const colorGap = Math.abs(baseColor.red-finalColor.red) + Math.abs(baseColor.green-finalColor.green) + Math.abs(baseColor.blue-finalColor.blue);
+   const colorChangePerMilliSecond = (colorGap / second) * (timeOut / 1000);
+
+   quizInterval = runTimeBar(i);
    function runTimeBar(widthGone) {
       i = widthGone;
       return setInterval(() => {
          if(i >= canvasWidth) {
             clearInterval(quizInterval);
+            audio.clockTick.pause();
+            audio.wrong.currentTime = 0;
+            audio.wrong.play();
             delayBeforeNextQuestion(1000, '時間切れ', false)
                .then(() => {
                   answersContainer.innerHTML = '';
@@ -696,26 +743,54 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
          }
          ctx.clearRect(0, 0, canvasWidth, canvas.height);
          const width = canvasWidth - i;
-         if(baseColor.red >= finalColor.red) {
-            baseColor.red = finalColor.red;
-            if(baseColor.green <= finalColor.green) {
-               baseColor.green = finalColor.green;
-               if(baseColor.blue <= finalColor.blue) {   
-                  baseColor.blue = finalColor.blue;
-               } else {
-                  baseColor.blue -= colorChangePerMilliSecond;
-               }
-            } else {
-               baseColor.green -= colorChangePerMilliSecond;
-            }
-         } else {
-            baseColor.red += colorChangePerMilliSecond;
-         }
-         const color = `rgb(${baseColor.red}, ${baseColor.green}, ${baseColor.blue})`
+         changeColor(baseColor, finalColor, colorChangePerMilliSecond);
+         const color = `rgb(${baseColor.currentRed}, ${baseColor.currentGreen}, ${baseColor.currentBlue})`
          ctx.fillStyle = color;
          ctx.fillRect(0, 0, width, canvas.height);
          i += widthPerMilliSecond;
       }, timeOut)
+   }
+}
+
+/**
+ * 
+ * @param {Object} baseColor 
+ * @param {Object} finalColor 
+ * @param {Number} changeInMilliSecond 
+ */
+function changeColor(baseColor, finalColor, changeInMilliSecond) {
+   // order: red --> green --> blue
+   if(baseColor.currentRed == finalColor.red) {
+      if(baseColor.currentGreen == finalColor.green) {
+         if(baseColor.currentBlue != finalColor.blue) {
+            if (baseColor.blue > finalColor.blue) {
+               baseColor.currentBlue -= changeInMilliSecond;
+               if(baseColor.currentBlue <= finalColor.blue) baseColor.currentBlue = finalColor.blue;
+            }
+            else {
+               baseColor.currentBlue += changeInMilliSecond;
+               if(baseColor.currentBlue >= finalColor.blue) baseColor.currentBlue = finalColor.blue;
+            }
+         }
+      } else {
+         if (baseColor.green > finalColor.green) {
+            baseColor.currentGreen -= changeInMilliSecond;
+            if(baseColor.currentGreen <= finalColor.green) baseColor.currentGreen = finalColor.green;
+         }
+         else {
+            baseColor.currentGreen += changeInMilliSecond;
+            if(baseColor.currentGreen >= finalColor.green) baseColor.currentGreen = finalColor.green;
+         }
+      }
+   } else {
+      if (baseColor.red > finalColor.red) {
+         baseColor.currentRed -= changeInMilliSecond;
+         if(baseColor.currentRed <= finalColor.red) baseColor.currentRed = finalColor.red;
+      }
+      else {
+         baseColor.currentRed += changeInMilliSecond;
+         if(baseColor.currentRed >= finalColor.red) baseColor.currentRed = finalColor.red;
+      }
    }
 }
 
