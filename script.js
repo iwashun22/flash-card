@@ -648,6 +648,7 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
    };
    if(keys.length == 0) {
       keys = Array.from(cardsMap.keys());
+      alreadyAnsweredKeys = [];
       shuffle(keys);
    }
    // play audio
