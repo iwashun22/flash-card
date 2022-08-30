@@ -734,9 +734,8 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
    // without this code the canvas width will be 100 because in html it's setted to 100% width
    const canvasWidth = parseInt(window.getComputedStyle(canvas).width.replace('px', ''));
    canvas.width = canvasWidth;
-   // console.log(canvas.height);
    ctx.fillRect(0, 0, canvasWidth, canvas.height);
-   const widthPerMilliSecond = (canvasWidth / second) * (timeOut / 1000);
+   const widthPerTimeOut = (canvasWidth / second) * (timeOut / 1000);
    let i = 0;
    // green to red
    // baseColor must have green or blue color
@@ -759,7 +758,7 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
    }
    Object.freeze(finalColor);
    const colorGap = Math.abs(baseColor.red-finalColor.red) + Math.abs(baseColor.green-finalColor.green) + Math.abs(baseColor.blue-finalColor.blue);
-   const colorChangePerMilliSecond = (colorGap / second) * (timeOut / 1000);
+   const colorChangePerTimeOut = (colorGap / second) * (timeOut / 1000);
 
    quizInterval = runTimeBar(i);
    function runTimeBar(widthGone) {
@@ -779,11 +778,11 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
          }
          ctx.clearRect(0, 0, canvasWidth, canvas.height);
          const width = canvasWidth - i;
-         changeColor(baseColor, finalColor, colorChangePerMilliSecond);
+         changeColor(baseColor, finalColor, colorChangePerTimeOut);
          const color = `rgb(${baseColor.currentRed}, ${baseColor.currentGreen}, ${baseColor.currentBlue})`
          ctx.fillStyle = color;
          ctx.fillRect(0, 0, width, canvas.height);
-         i += widthPerMilliSecond;
+         i += widthPerTimeOut;
       }, timeOut)
    }
 }
@@ -792,39 +791,39 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
  * 
  * @param {Object} baseColor 
  * @param {Object} finalColor 
- * @param {Number} changeInMilliSecond 
+ * @param {Number} change 
  */
-function changeColor(baseColor, finalColor, changeInMilliSecond) {
+function changeColor(baseColor, finalColor, change) {
    // order: red --> green --> blue
    if(baseColor.currentRed == finalColor.red) {
       if(baseColor.currentGreen == finalColor.green) {
          if(baseColor.currentBlue != finalColor.blue) {
             if (baseColor.blue > finalColor.blue) {
-               baseColor.currentBlue -= changeInMilliSecond;
+               baseColor.currentBlue -= change;
                if(baseColor.currentBlue <= finalColor.blue) baseColor.currentBlue = finalColor.blue;
             }
             else {
-               baseColor.currentBlue += changeInMilliSecond;
+               baseColor.currentBlue += change;
                if(baseColor.currentBlue >= finalColor.blue) baseColor.currentBlue = finalColor.blue;
             }
          }
       } else {
          if (baseColor.green > finalColor.green) {
-            baseColor.currentGreen -= changeInMilliSecond;
+            baseColor.currentGreen -= change;
             if(baseColor.currentGreen <= finalColor.green) baseColor.currentGreen = finalColor.green;
          }
          else {
-            baseColor.currentGreen += changeInMilliSecond;
+            baseColor.currentGreen += change;
             if(baseColor.currentGreen >= finalColor.green) baseColor.currentGreen = finalColor.green;
          }
       }
    } else {
       if (baseColor.red > finalColor.red) {
-         baseColor.currentRed -= changeInMilliSecond;
+         baseColor.currentRed -= change;
          if(baseColor.currentRed <= finalColor.red) baseColor.currentRed = finalColor.red;
       }
       else {
-         baseColor.currentRed += changeInMilliSecond;
+         baseColor.currentRed += change;
          if(baseColor.currentRed >= finalColor.red) baseColor.currentRed = finalColor.red;
       }
    }
