@@ -774,8 +774,7 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
          }
          ctx.clearRect(0, 0, canvasWidth, canvas.height);
          const width = canvasWidth - widthGone;
-         changeColor(baseColor, finalColor, colorChangePerTimeOut);
-         const color = `rgb(${baseColor.currentRed}, ${baseColor.currentGreen}, ${baseColor.currentBlue})`
+         const color = changeColor(baseColor, finalColor, colorChangePerTimeOut);
          ctx.fillStyle = color;
          ctx.fillRect(0, 0, width, canvas.height);
          widthGone += widthPerTimeOut;
@@ -791,41 +790,38 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
  */
 function changeColor(baseColor, finalColor, change) {
    // order: red --> green --> blue
-   handleEachColor(
-      baseColor, 'red', 'currentRed', 
-      finalColor.red, 
-      change,
-      () => {
-         handleEachColor(
-            baseColor, 'green', 'currentGreen',
-            finalColor.green,
-            change,
-            () => {
-               handleEachColor(
-                  baseColor, 'blue', 'currentBlue',
-                  finalColor.blue,
-                  change,
-                  ()=>{}
-               )
-            }
-         )
-      }
-   )
+   if(baseColor.currentRed !== finalColor.red) {
+      handleEachColor(
+         baseColor, 'red', 'currentRed',
+         finalColor.red,
+         change
+      );
+   } else if(baseColor.currentGreen !== finalColor.green) {
+      handleEachColor(
+         baseColor, 'green', 'currentGreen',
+         finalColor.green,
+         change
+      );
+   } else if(baseColor.currentBlue !== finalColor.blue) {
+      handleEachColor(
+         baseColor, 'blue', 'currentBlue',
+         finalColor.blue,
+         change
+      );
+   }
+
+   return `rgb(${baseColor.currentRed}, ${baseColor.currentGreen}, ${baseColor.currentBlue})`;
 }
-function handleEachColor(baseColorObj, baseColorProp, currentColorProp, finalColor, change, callback) {
-   if(baseColorObj[currentColorProp] === finalColor || baseColorObj[baseColorProp] === finalColor) {
-      callback();
+function handleEachColor(baseColorObj, baseColorProp, currentColorProp, finalColor, change) {
+   if(baseColorObj[baseColorProp] > finalColor) {
+      baseColorObj[currentColorProp] -= change;
+      if(baseColorObj[currentColorProp] <= finalColor) {
+         baseColorObj[currentColorProp] = finalColor;
+      }
    } else {
-      if(baseColorObj[baseColorProp] > finalColor) {
-         baseColorObj[currentColorProp] -= change;
-         if(baseColorObj[currentColorProp] <= finalColor) {
-            baseColorObj[currentColorProp] = finalColor;
-         }
-      } else {
-         baseColorObj[currentColorProp] += change;
-         if(baseColorObj[currentColorProp] >= finalColor) {
-            baseColorObj[currentColorProp] = finalColor;
-         }
+      baseColorObj[currentColorProp] += change;
+      if(baseColorObj[currentColorProp] >= finalColor) {
+         baseColorObj[currentColorProp] = finalColor;
       }
    }
 }
