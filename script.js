@@ -619,9 +619,11 @@ const audio = {
    correct: new Audio('./audios/correct-answer.mp3')
 }
 
-function playClockTickAudio(fromStart) {
-   fromStart ? audio.clockTick.currentTime = 0 : null;
-   audio.clockTick.play();
+function playAudio(_audio, fromStart) {
+   if(fromStart) {
+      _audio.currentTime = 0;
+   }
+   _audio.play();
 }
 
 let quizInterval;
@@ -652,7 +654,7 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
       shuffle(keys);
    }
    // play audio
-   playClockTickAudio(true);
+   playAudio(audio.clockTick, true);
 
    // pause : quit button
    quitButton.addEventListener('click', handlePauseAndQuit);
@@ -672,8 +674,8 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
          },
          () => {
             buttons.forEach(b => { b.classList.remove('hide'); })
-            quizInterval = runTimeBar(i);
-            playClockTickAudio(false);
+            quizInterval = runTimeBar(widthGone);
+            playAudio(audio.clockTick, false);
          }
       );
    }
@@ -686,10 +688,8 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
 
    const answerKey = keys.splice(Math.floor(Math.random() * keys.length), 1)[0];
    // remove from the answered key in case there's overlapping
-   const indexOfAnsweredKey = alreadyAnsweredKeys.findIndex(key => key === answerKey);
-   if(indexOfAnsweredKey !== -1) {
-      alreadyAnsweredKeys.splice(indexOfAnsweredKey, 1);
-   }
+   alreadyAnsweredKeys = alreadyAnsweredKeys.filter(key => key !== answerKey);
+
    const answerValue = cardsMap.get(answerKey);
    document.querySelector('.question-text').innerText = answerValue;
    // don't want to splice from original keys array so copied instead
@@ -698,9 +698,12 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
    alreadyAnsweredKeys.push(answerKey);
    // 4 choices
    let choices = [answerKey];
-   choices[1] = copiedKeys.splice(Math.floor(Math.random()*copiedKeys.length), 1)[0];
-   choices[2] = copiedKeys.splice(Math.floor(Math.random()*copiedKeys.length), 1)[0];
-   choices[3] = copiedKeys.splice(Math.floor(Math.random()*copiedKeys.length), 1)[0];
+   for(let i=1; i<=3; i++) {
+      choices.push(
+         copiedKeys.splice(Math.floor(Math.random()*copiedKeys.length), 1)[0]
+      );
+   }
+
    buttons.forEach((button, index) => {
       button.innerText = choices[index];
       button.addEventListener('click', () => {
@@ -710,11 +713,9 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
          const isCorrect = choices[index] === answerKey;
          if(isCorrect) {
             correctAnswers.push(0);
-            audio.correct.currentTime = 0;
-            audio.correct.play();
+            playAudio(audio.correct, true);
          } else {
-            audio.wrong.currentTime = 0;
-            audio.wrong.play();
+            playAudio(audio.wrong, true);
          }
          const result = isCorrect ? '正解' : '不正解';
          delayBeforeNextQuestion(1000, result, isCorrect)
@@ -730,15 +731,12 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
    })
 
    const timeOut = 80;
-   ctx.fillStyle = '#F1BF55';
    // without this code the canvas width will be 100 because in html it's setted to 100% width
    const canvasWidth = parseInt(window.getComputedStyle(canvas).width.replace('px', ''));
    canvas.width = canvasWidth;
-   ctx.fillRect(0, 0, canvasWidth, canvas.height);
    const widthPerTimeOut = (canvasWidth / second) * (timeOut / 1000);
-   let i = 0;
+   let widthGone = 0;
    // green to red
-   // baseColor must have green or blue color
    const baseColor = {
       red: 90,
       currentRed: 90,
@@ -760,15 +758,13 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
    const colorGap = Math.abs(baseColor.red-finalColor.red) + Math.abs(baseColor.green-finalColor.green) + Math.abs(baseColor.blue-finalColor.blue);
    const colorChangePerTimeOut = (colorGap / second) * (timeOut / 1000);
 
-   quizInterval = runTimeBar(i);
-   function runTimeBar(widthGone) {
-      i = widthGone;
+   quizInterval = runTimeBar(widthGone);
+   function runTimeBar() {
       return setInterval(() => {
-         if(i >= canvasWidth) {
+         if(widthGone >= canvasWidth) {
             clearInterval(quizInterval);
             audio.clockTick.pause();
-            audio.wrong.currentTime = 0;
-            audio.wrong.play();
+            playAudio(audio.wrong, true);
             delayBeforeNextQuestion(1000, '時間切れ', false)
                .then(() => {
                   answersContainer.innerHTML = '';
@@ -777,12 +773,12 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
                })
          }
          ctx.clearRect(0, 0, canvasWidth, canvas.height);
-         const width = canvasWidth - i;
+         const width = canvasWidth - widthGone;
          changeColor(baseColor, finalColor, colorChangePerTimeOut);
          const color = `rgb(${baseColor.currentRed}, ${baseColor.currentGreen}, ${baseColor.currentBlue})`
          ctx.fillStyle = color;
          ctx.fillRect(0, 0, width, canvas.height);
-         i += widthPerTimeOut;
+         widthGone += widthPerTimeOut;
       }, timeOut)
    }
 }
