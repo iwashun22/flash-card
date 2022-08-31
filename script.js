@@ -791,36 +791,41 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
  */
 function changeColor(baseColor, finalColor, change) {
    // order: red --> green --> blue
-   if(baseColor.currentRed == finalColor.red) {
-      if(baseColor.currentGreen == finalColor.green) {
-         if(baseColor.currentBlue != finalColor.blue) {
-            if (baseColor.blue > finalColor.blue) {
-               baseColor.currentBlue -= change;
-               if(baseColor.currentBlue <= finalColor.blue) baseColor.currentBlue = finalColor.blue;
+   handleEachColor(
+      baseColor, 'red', 'currentRed', 
+      finalColor.red, 
+      change,
+      () => {
+         handleEachColor(
+            baseColor, 'green', 'currentGreen',
+            finalColor.green,
+            change,
+            () => {
+               handleEachColor(
+                  baseColor, 'blue', 'currentBlue',
+                  finalColor.blue,
+                  change,
+                  ()=>{}
+               )
             }
-            else {
-               baseColor.currentBlue += change;
-               if(baseColor.currentBlue >= finalColor.blue) baseColor.currentBlue = finalColor.blue;
-            }
+         )
+      }
+   )
+}
+function handleEachColor(baseColorObj, baseColorProp, currentColorProp, finalColor, change, callback) {
+   if(baseColorObj[currentColorProp] === finalColor || baseColorObj[baseColorProp] === finalColor) {
+      callback();
+   } else {
+      if(baseColorObj[baseColorProp] > finalColor) {
+         baseColorObj[currentColorProp] -= change;
+         if(baseColorObj[currentColorProp] <= finalColor) {
+            baseColorObj[currentColorProp] = finalColor;
          }
       } else {
-         if (baseColor.green > finalColor.green) {
-            baseColor.currentGreen -= change;
-            if(baseColor.currentGreen <= finalColor.green) baseColor.currentGreen = finalColor.green;
+         baseColorObj[currentColorProp] += change;
+         if(baseColorObj[currentColorProp] >= finalColor) {
+            baseColorObj[currentColorProp] = finalColor;
          }
-         else {
-            baseColor.currentGreen += change;
-            if(baseColor.currentGreen >= finalColor.green) baseColor.currentGreen = finalColor.green;
-         }
-      }
-   } else {
-      if (baseColor.red > finalColor.red) {
-         baseColor.currentRed -= change;
-         if(baseColor.currentRed <= finalColor.red) baseColor.currentRed = finalColor.red;
-      }
-      else {
-         baseColor.currentRed += change;
-         if(baseColor.currentRed >= finalColor.red) baseColor.currentRed = finalColor.red;
       }
    }
 }
