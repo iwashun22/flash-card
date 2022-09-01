@@ -1,6 +1,7 @@
 :root {
    --search-bar-border-color: rgb(0, 206, 202);
    --search-bar-border-hover-color: rgb(0, 234, 255);
+   --search-bar-border-radius: 25px;
    --floating-button-size: 60px;
    --floating-button-spacing: 10px;
    --cards-box-width: 300px;
@@ -15,13 +16,9 @@
    --cards-checked-background-color: rgb(255, 228, 178);
    --cards-button-size: 35px;
    --cards-delete-button-color: transparent;
-   /* --cards-delete-button-color: red; */
    --cards-delete-button-hover-color: rgb(255, 169, 169);
-   /* --cards-delete-button-hover-color: rgb(170, 0, 0); */
    --cards-edit-button-color: transparent;
-   /* --cards-edit-button-color: rgb(0, 205, 78); */
    --cards-edit-button-hover-color: rgb(205, 255, 191);
-   /* --cards-edit-button-hover-color: rgb(11, 134, 0); */
 }
 
 /* background */
@@ -124,8 +121,8 @@
    border-top: 2px var(--search-bar-border-color) solid;
    border-left: 2px var(--search-bar-border-color) solid;
    border-bottom: 2px var(--search-bar-border-color) solid;
-   border-bottom-left-radius: 25px;
-   border-top-left-radius: 25px;
+   border-bottom-left-radius: var(--search-bar-border-radius);
+   border-top-left-radius: var(--search-bar-border-radius);
    transition: .3s;
 }
 .search-bar input:focus {
@@ -133,11 +130,11 @@
    border-width: 4px 0 4px 4px;
    border-color: var(--search-bar-border-hover-color);
 }
-.search-bar input:focus + button {
+.search-bar input:focus + #trigger-search {
    border-width: 4px 4px 4px;
    border-color: var(--search-bar-border-hover-color);
 }
-.search-bar button {
+#trigger-search {
    height: 40px;
    width: 70px;
    cursor: pointer;
@@ -146,12 +143,27 @@
    border-bottom: 2px var(--search-bar-border-color) solid;
    position: relative;
    background-color: white;
-   border-bottom-right-radius: 25px;
-   border-top-right-radius: 25px;
+   border-bottom-right-radius: var(--search-bar-border-radius);
+   border-top-right-radius: var(--search-bar-border-radius);
    transition: .2s;
 }
-.search-bar button:hover {
+#trigger-search:hover {
    background-color: rgb(230, 230, 230);
+}
+#show-usage {
+   height: 40px;
+   width: 100px;
+   background-color: rgb(196, 255, 108);
+   border: 3px rgb(136, 210, 24) solid;
+   color: gray;
+   font-family: "Tsukushi A Round Gothic","筑紫A丸ゴシック", "Arial", Arial, sans-serif;
+   font-size: 20px;
+   font-weight: bold;
+   margin: 15px;
+}
+#show-usage:hover {
+   color: white;
+   background-color: rgb(141, 209, 40);
 }
 button img {
    position: absolute;

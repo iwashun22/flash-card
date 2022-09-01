@@ -53,6 +53,18 @@ document.addEventListener('mousemove', e => {
 })
 
 
+//::: USAGE GUIDE ::://
+const showGuideButton = document.getElementById('show-usage');
+const guideSection = document.getElementById('guide-section');
+showGuideButton.addEventListener('click', e => {
+   guideSection.classList.remove('hide');
+})
+const hideGuideButton = document.getElementById('close-guide');
+hideGuideButton.addEventListener('click', e => {
+   guideSection.classList.add('hide');
+})
+
+
 //::: ADDING INITIAL CARDS TO DOCUMENT ::://
 searchAndDisplay();
 

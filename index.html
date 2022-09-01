@@ -6,6 +6,7 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>flash cards</title>
    <link rel="stylesheet" href="./general.css">
+   <link rel="stylesheet" href="./usage-guide.css">
    <link rel="stylesheet" href="./style.css">
    <link rel="stylesheet" href="./pop-up.css">
    <link rel="stylesheet" href="./quiz.css">
@@ -13,12 +14,30 @@
 <body>
    <div id="root">
       <div class="background"></div>
+      <div class="block-filter hide" id="guide-section">
+         <div class="guide-pop-up">
+            <div class="img-container flex">
+               <img width="270px" src="./images/usage-guide.png" alt="image">
+            </div>
+            <ul class="guide-list">
+               <li><span class="circle">1</span> カード名に含まれる文字を入力してカードを探す</li>
+               <li><span class="circle">2</span> それぞれのカードをクリックして内容を確認、編集、削除する</li>
+               <li><span class="circle">3</span> 全てのカードを削除する</li>
+               <li><span class="circle">4</span> カードを追加する</li>
+               <li><span class="circle">5</span> クイズを始める（カードは４つ以上必要）</li>
+            </ul>
+            <button id="close-guide">
+               <img width="25px" height="25px" src="./images/rectangle-xmark-solid.svg" alt="icon">
+            </button>
+         </div>
+      </div>
       <div class="container flex-column" id="main">
          <div class="search-bar flex">
             <input type="text" id="search-card-input" placeholder="search">
             <button id="trigger-search">
                <img width="20px" height="20px" src="./images/magnifying-glass-solid.svg" alt="icon">
             </button>
+            <button id="show-usage">ヘルプ</button>
          </div>
          <div id="cards-container" class="flex">
             <!-- script -->
