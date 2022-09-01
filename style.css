@@ -153,6 +153,7 @@
 #show-usage {
    height: 40px;
    width: 100px;
+   cursor: pointer;
    background-color: rgb(196, 255, 108);
    border: 3px rgb(136, 210, 24) solid;
    color: gray;

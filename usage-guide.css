@@ -44,6 +44,7 @@
 .guide-pop-up button {
    width: 60vw;
    height: 30px;
+   cursor: pointer;
    background-color: rgb(214, 0, 0);
 }
 .guide-pop-up button:hover {
