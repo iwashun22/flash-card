@@ -604,10 +604,6 @@ function startQuiz(numOfQuestions, speed) {
    });
 
    quizSection.classList.remove('hide');
-
-   let keys = Array.from(cardsMap.keys());
-   shuffle(keys);
-
    answersContainer.innerHTML = '';
 
    let speedInSecond;
@@ -617,7 +613,7 @@ function startQuiz(numOfQuestions, speed) {
       case 'fast': speedInSecond = 5; break;
       case 'very-fast': speedInSecond = 2; break;
    }
-   createMultipleChoices(keys, [], numOfQuestions, speedInSecond, [], numOfQuestions);
+   createMultipleChoices([], [], numOfQuestions, speedInSecond, [], numOfQuestions);
 }
 
 const quitButton = document.getElementById('finish-quiz');
@@ -662,6 +658,7 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
    };
    if(keys.length == 0) {
       keys = Array.from(cardsMap.keys());
+      shuffle(keys);
       alreadyAnsweredKeys = [];
       shuffle(keys);
    }
@@ -695,8 +692,7 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
    const second = speedInSecond || 15;
    const multipleChoiceTemplate = template.QUIZ.cloneNode(true);
    const elements = Array.from(multipleChoiceTemplate.querySelectorAll('div'));
-   let buttons = Array.from(multipleChoiceTemplate.querySelectorAll('.answer-btn'));
-   shuffle(buttons);
+   const buttons = Array.from(multipleChoiceTemplate.querySelectorAll('.answer-btn'));
 
    const answerKey = keys.splice(Math.floor(Math.random() * keys.length), 1)[0];
    // remove from the answered key in case there's overlapping
@@ -715,6 +711,7 @@ function createMultipleChoices(keys, alreadyAnsweredKeys, xtimes, speedInSecond,
          copiedKeys.splice(Math.floor(Math.random()*copiedKeys.length), 1)[0]
       );
    }
+   shuffle(choices);
 
    buttons.forEach((button, index) => {
       button.innerText = choices[index];
