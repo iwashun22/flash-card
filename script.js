@@ -28,9 +28,25 @@ const cardsMap = new Map([
    ['maintain', '…を維持する'],
 ]);
 
+const LOCAL_STORAGE_KEY = 'cards';
+
+const cards = localStorage.getItem(LOCAL_STORAGE_KEY);
+console.log(cards);
+if(cards) {
+   const json = JSON.parse(cards);
+   cardsMap.clear();
+   for(const key in json) {
+      cardsMap.set(key, json[key]);
+   }
+}
+
+function updateLocalStorage() {
+   const obj = Object.fromEntries(cardsMap);
+   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(obj));
+}
+
 
 window.addEventListener('load', () => {
-
 
 //::: BACKGROUND MOUSE EFFECT ::://
 const bg = document.querySelector('.background');
@@ -159,6 +175,7 @@ deleteAllButton.addEventListener('click', e => {
             cardsContainer.innerHTML = '';
             cardsMap.clear();
          }
+         updateLocalStorage();
       }
    )
 })
@@ -380,6 +397,7 @@ function createCard(isNew, key, value, highlight) {
             cardsMap.set(key, value);
             text = value;
          }
+         updateLocalStorage();
       }
    } else {
       text = cardsMap.get(key); 
@@ -441,6 +459,7 @@ function createCard(isNew, key, value, highlight) {
                   if(!hasUnwantedCharacter("", textarea.value)) {
                      cardDescription.innerText = textarea.value;
                      cardsMap.set(key, textarea.value);
+                     updateLocalStorage();
                   }
                } else {
                   createPopUp({ 
@@ -471,6 +490,7 @@ function createCard(isNew, key, value, highlight) {
          () => {
             cardsContainer.removeChild(node);
             cardsMap.delete(key);
+            updateLocalStorage();
          }
       )
    })
